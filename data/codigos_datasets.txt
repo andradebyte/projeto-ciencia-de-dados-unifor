@@ -1,0 +1,73 @@
+CODIGOS (_codigo) POR DATASET
+Referencia: valores unicos de cada coluna que termina em "_codigo" nas tabelas SIDRA usadas no projeto.
+
+===========================================
+PIB (t5938_pib_agropecuaria_2003_2023_ce_br.csv)
+===========================================
+
+nivel_territorial_codigo:
+N1 Brasil
+N3 Unidade da Federacao
+N6 Municipio
+
+ano_codigo: 2003 a 2023
+
+variavel_codigo:
+37   Produto Interno Bruto a precos correntes
+498  Valor adicionado bruto a precos correntes total
+513  Valor adicionado bruto a precos correntes da agropecuaria
+516  Participacao do valor adicionado bruto a precos correntes da agropecuaria no valor adicionado bruto a precos correntes total
+
+territorio_codigo: 186 valores (ver docs/territorio_codigo.txt)
+
+===========================================
+PAM (t5457_pam_*_2003_2024_ce_br.csv) - 5 arquivos
+===========================================
+
+nivel_territorial_codigo:
+N1 Brasil
+N3 Unidade da Federacao
+N6 Municipio
+
+ano_codigo: 2003 a 2024
+
+variavel_codigo (um por arquivo):
+112   Rendimento medio da producao
+214   Quantidade produzida
+215   Valor da producao
+216   Area colhida
+8331  Area plantada ou destinada a colheita
+
+produto_codigo:
+40106  Cana-de-acucar
+40112  Feijao (em grao)
+40119  Mandioca
+40121  Melao
+40122  Milho (em grao)
+40136  Banana (cacho)
+40143  Castanha de caju
+
+territorio_codigo: 186 valores (ver docs/territorio_codigo.txt)
+
+===========================================
+PPM (t3939_ppm_efetivo_rebanhos_2003_2024_ce_br.csv)
+===========================================
+
+nivel_territorial_codigo:
+N1 Brasil
+N3 Unidade da Federacao
+N6 Municipio
+
+ano_codigo: 2003 a 2024
+
+variavel_codigo:
+105  Efetivo dos rebanhos
+
+tipo_rebanho_codigo:
+2670   Bovino
+2677   Ovino
+2681   Caprino
+32794  Suino - total
+32796  Galinaceos - total
+
+territorio_codigo: 186 valores (ver docs/territorio_codigo.txt)
