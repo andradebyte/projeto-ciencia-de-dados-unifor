@@ -1,0 +1,19 @@
+Tabela 5457 (PAM) (Pessoa 1):
+Período: 2003–2024 (22 anos), sem lacuna
+Granularidade (Chave Única): territorio_codigo + ano_codigo + produto_codigo + variavel_codigo — 1 linha por município x ano x produto x variável (5 arquivos, 1 por variável: área colhida, área plantada, quantidade produzida, rendimento médio, valor da produção). 7 produtos: Milho, Feijão, Mandioca, Cana-de-açúcar, Banana, Castanha de caju, Melão
+Unidades: Hectares (área), Toneladas (quantidade), Kg/Hectare (rendimento), Mil Reais (valor)
+Principais campos utilizados: territorio_codigo, ano_codigo, produto_nome, variavel_nome, valor — filtra nivel_territorial_nome == "Município"
+
+Tabela 3939 (PPM) (Pessoa 4):
+Período: 2003–2024 (22 anos), sem lacuna
+Granularidade (Chave Única): territorio_codigo + ano_codigo + tipo_rebanho_codigo — 1 linha por município x ano x espécie. 5 espécies: Bovino, Caprino, Ovino, Suíno, Galináceos
+Unidades: Cabeças (efetivo dos rebanhos)
+Principais campos utilizados: territorio_codigo, ano_codigo, tipo_rebanho_nome, valor — usa só espécie Bovino (não soma espécies)
+
+Tabela 5938 (PIB Municipal) (Pessoa 3):
+Período: 2003–2023 (21 anos). PIB total sem lacuna; VAB total/VAB agro/participação % ficam nulos a partir de 2022
+Granularidade (Chave Única): territorio_codigo + ano_codigo + variavel_codigo — 1 linha por município x ano x variável, 4 variáveis
+Unidades: Mil Reais (PIB, VAB total, VAB agro), % (participação agro no VAB)
+Principais campos utilizados: territorio_codigo, ano_codigo, variavel_nome, valor — filtra nivel_territorial_nome == "Município", pivota 4 variáveis pra colunas (PIB, VAB_total, VAB_agro, participacao_agro)
+
+territorio_codigo (IBGE) é chave comum das 3 — 186 valores no bruto (Brasil + UF + 184 municípios CE), 184 usados após filtro município.

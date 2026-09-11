@@ -1,0 +1,16 @@
+# ambiente
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# TODAS as camadas de dados sao versionadas de proposito:
+#   raw        -> pacote original exigido pelo projeto
+#   processed  -> rastreabilidade da transformacao
+#   analytical -> o dashboard publicado le estes arquivos do repositorio
+# (regeneraveis por `python src/preparacao.py`, mas o deploy depende deles)
