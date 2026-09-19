@@ -112,18 +112,23 @@ pam_agg = pam_agg.merge(plant_agg, on=["territorio_codigo", "ano_codigo"], how="
 pam_agg = pam_agg.merge(colh_agg, on=["territorio_codigo", "ano_codigo"], how="left")
 pam_agg["taxa_frustracao_safra"] = 1 - (pam_agg["area_colhida_total_ha"] / pam_agg["area_plantada_total_ha"])
 
-ppm_agg = ppm_mun.groupby(["territorio_codigo", "territorio_nome", "ano_codigo"], as_index=False)[
-    "valor"].sum().rename(columns={"valor": "efetivo_total_cab"})
-ppm_capr_ovi = ppm_mun[ppm_mun["tipo_rebanho_codigo"].isin(["2681", "2677"])].groupby(
-    ["territorio_codigo", "ano_codigo"], as_index=False)["valor"].sum().rename(
-    columns={"valor": "efetivo_caprino_ovino_cab"})
-ppm_agg = ppm_agg.merge(ppm_capr_ovi, on=["territorio_codigo", "ano_codigo"], how="left")
+# Efetivo por especie mantido em colunas separadas (NUNCA somado entre especies:
+# bovino, caprino, ovino, suino e galinaceo nao sao unidades equivalentes -
+# 1 cabeca de bovino != 1 cabeca de galinaceo. Ver data/README_DADOS.md item 4-5
+# e a analise dedicada em notebooks/06_evolucao_pecuaria.py).
+REBANHO_COD_NOME = {"2670": "bovino", "2681": "caprino", "2677": "ovino",
+                     "32794": "suino", "32796": "galinaceo"}
+ppm_wide = ppm_mun.pivot_table(
+    index=["territorio_codigo", "territorio_nome", "ano_codigo"],
+    columns="tipo_rebanho_codigo", values="valor", aggfunc="first"
+).rename(columns={cod: f"efetivo_{nome}_cab" for cod, nome in REBANHO_COD_NOME.items()}).reset_index()
+ppm_agg = ppm_wide
 
 # ---------------------------------------------------------------------------
 # 4. Cruzamento final PAM_agg x PPM_agg x PIB_wide por codigo IBGE + ano
 # ---------------------------------------------------------------------------
-m1 = pam_agg.merge(ppm_agg[["territorio_codigo", "ano_codigo", "efetivo_total_cab",
-                             "efetivo_caprino_ovino_cab"]],
+col_efetivo = [f"efetivo_{nome}_cab" for nome in REBANHO_COD_NOME.values()]
+m1 = pam_agg.merge(ppm_agg[["territorio_codigo", "ano_codigo"] + col_efetivo],
                     on=["territorio_codigo", "ano_codigo"], how="outer", indicator="_m_pam_ppm")
 final = m1.merge(pib_wide, on=["territorio_codigo", "ano_codigo"], how="outer", indicator="_m_com_pib")
 

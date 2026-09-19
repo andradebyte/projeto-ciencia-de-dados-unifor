@@ -3,7 +3,9 @@ Visualizacoes preliminares (secao 5 do relatorio de acompanhamento), a partir
 do cruzamento gerado por 04_cruzamento_pam_ppm_pib.py.
 
 Visualizacao 1: taxa de frustracao de safra vs. crescimento do efetivo de
-caprinos+ovinos, 2003-2024, agregado Ceara + 2 municipios de exemplo.
+caprinos e ovinos (especies mantidas separadas, nunca somadas - ver
+data/README_DADOS.md item 4-5 e notebooks/06_evolucao_pecuaria.py), 2003-2024,
+Ceara + 2 municipios de exemplo.
 Visualizacao 2: dispersao PAM x PPM x PIB por municipio, ano de referencia
 2021 (ultimo ano com participacao do VAB agropecuario valida).
 """
@@ -37,7 +39,9 @@ pib = read_sidra(f"{RAW}/t5938_pib_agropecuaria_2003_2023_ce_br.csv", {"variavel
 # ---------------------------------------------------------------------------
 # Visualizacao 1: serie temporal estado + 2 municipios de exemplo
 # ---------------------------------------------------------------------------
-CAPRINO_OVINO = ["2681", "2677"]
+# Caprino e ovino tratados como series SEPARADAS (nunca somadas - ver
+# data/README_DADOS.md item 4-5): cada especie e uma unidade diferente.
+CAPRINO_OVINO = {"2681": "caprino", "2677": "ovino"}
 
 def frustracao_por_territorio(cod, nivel):
     p = pam_plant[(pam_plant["territorio_codigo"] == cod) & (pam_plant["nivel_territorial_codigo"] == nivel)]
@@ -46,52 +50,59 @@ def frustracao_por_territorio(cod, nivel):
     c_ano = c.groupby("ano_codigo")["valor"].sum()
     return (1 - c_ano / p_ano).rename("taxa_frustracao_safra")
 
-def indice_capr_ovino(cod, nivel):
+def indice_por_especie(cod, nivel, tipo_rebanho_codigo):
     r = ppm[(ppm["territorio_codigo"] == cod) & (ppm["nivel_territorial_codigo"] == nivel)
-            & (ppm["tipo_rebanho_codigo"].isin(CAPRINO_OVINO))]
+            & (ppm["tipo_rebanho_codigo"] == tipo_rebanho_codigo)]
     r_ano = r.groupby("ano_codigo")["valor"].sum()
     base = r_ano.loc[2003]
-    return (r_ano / base * 100).rename("indice_capr_ovino_2003_100")
+    return (r_ano / base * 100).rename("indice_2003_100")
 
-# municipios de exemplo: os 2 com maior efetivo medio de caprino+ovino 2003-2024 (dado real)
+# municipio de exemplo: o de maior efetivo medio de caprinos 2003-2024 (dado real,
+# especie escolhida isoladamente - nao e uma soma caprino+ovino)
 ppm_mun = ppm[ppm["nivel_territorial_codigo"] == "N6"]
-capr_ovi_mun = ppm_mun[ppm_mun["tipo_rebanho_codigo"].isin(CAPRINO_OVINO)]
-media_mun = capr_ovi_mun.groupby(["territorio_codigo", "territorio_nome"])["valor"].mean().sort_values(ascending=False)
-top2 = media_mun.head(2)
-print("2 municipios de exemplo (maior efetivo medio caprino+ovino 2003-2024):")
-print(top2)
+capr_mun = ppm_mun[ppm_mun["tipo_rebanho_codigo"] == "2681"]
+media_mun = capr_mun.groupby(["territorio_codigo", "territorio_nome"])["valor"].mean().sort_values(ascending=False)
+top1 = media_mun.head(1)
+print("1 municipio de exemplo (maior efetivo medio de CAPRINOS, 2003-2024):")
+print(top1)
 
 territorios_v1 = [("23", "N3", "Ceará (estado)")] + [
-    (cod, "N6", nome) for (cod, nome) in top2.index
+    (cod, "N6", nome) for (cod, nome) in top1.index
 ]
 
-fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharex=True)
+fig, axes = plt.subplots(1, 2, figsize=(13, 4.6), sharex=True)
 for cod, nivel, nome in territorios_v1:
     fr = frustracao_por_territorio(cod, nivel)
     axes[0].plot(fr.index, fr.values, marker="o", markersize=3, label=nome)
-    idx = indice_capr_ovino(cod, nivel)
-    axes[1].plot(idx.index, idx.values, marker="o", markersize=3, label=nome)
+    for tipo_cod, tipo_nome in CAPRINO_OVINO.items():
+        idx = indice_por_especie(cod, nivel, tipo_cod)
+        linestyle = "-" if tipo_nome == "caprino" else "--"
+        axes[1].plot(idx.index, idx.values, marker="o", markersize=3, linestyle=linestyle,
+                     label=f"{nome} — {tipo_nome}")
 
-axes[0].set_title("Taxa de frustração de safra (1 − área colhida / área plantada)")
+axes[0].set_title("Taxa de frustração de safra\n(1 − área colhida / área plantada)")
 axes[0].set_ylabel("Taxa")
 axes[0].axhline(0, color="grey", linewidth=0.6)
-axes[1].set_title("Crescimento do efetivo caprino + ovino (índice, 2003 = 100)")
+axes[1].set_title("Crescimento do efetivo — caprinos e ovinos\n(séries separadas, índice 2003 = 100)")
 axes[1].set_ylabel("Índice (2003=100)")
 for ax in axes:
     ax.set_xlabel("Ano")
-    ax.legend(fontsize=8)
+    ax.legend(fontsize=7)
     ax.grid(alpha=0.3)
-fig.suptitle("Visualização 1 (preliminar) — frustração de safra vs. crescimento de rebanhos caprinos/ovinos, 2003–2024")
-fig.tight_layout()
+fig.suptitle("Visualização 1 (preliminar) — frustração de safra vs. crescimento dos efetivos\n"
+             "de caprinos e ovinos (espécies separadas), 2003–2024", fontsize=12)
+fig.tight_layout(rect=[0, 0, 1, 0.92])
 fig.savefig("notebooks/fig_visualizacao1_serie_temporal.png", dpi=150)
 print("Figura salva: notebooks/fig_visualizacao1_serie_temporal.png")
 
 # valores citaveis para a interpretacao
 fr_ce = frustracao_por_territorio("23", "N3")
-idx_ce = indice_capr_ovino("23", "N3")
+idx_ce_caprino = indice_por_especie("23", "N3", "2681")
+idx_ce_ovino = indice_por_especie("23", "N3", "2677")
 print(f"\nCeará - taxa de frustração de safra: media 2003-2024 = {fr_ce.mean():.3f}, "
       f"min={fr_ce.min():.3f} (ano {fr_ce.idxmin()}), max={fr_ce.max():.3f} (ano {fr_ce.idxmax()})")
-print(f"Ceará - indice caprino+ovino em 2024 = {idx_ce.loc[2024]:.1f} (2003=100)")
+print(f"Ceará - indice caprinos em 2024 = {idx_ce_caprino.loc[2024]:.1f} (2003=100)")
+print(f"Ceará - indice ovinos em 2024 = {idx_ce_ovino.loc[2024]:.1f} (2003=100)")
 
 # ---------------------------------------------------------------------------
 # Visualizacao 2: dispersao PAM x PPM x PIB, ano de referencia 2021
@@ -101,8 +112,13 @@ pam_qtd_mun = pam_qtd[pam_qtd["nivel_territorial_codigo"] == "N6"]
 qtd_ano = pam_qtd_mun[pam_qtd_mun["ano_codigo"] == ANO_REF].groupby(
     ["territorio_codigo", "territorio_nome"])["valor"].sum().rename("qtd_produzida_t")
 
-efetivo_ano = ppm_mun[ppm_mun["ano_codigo"] == ANO_REF].groupby(
-    ["territorio_codigo", "territorio_nome"])["valor"].sum().rename("efetivo_total_cab")
+# Efetivo de UMA especie apenas (bovinos - maior peso economico na pecuaria
+# cearense). Bovino, caprino, ovino, suino e galinaceo nao sao unidades
+# equivalentes e nunca devem ser somados entre si (ver data/README_DADOS.md
+# item 4-5 e notebooks/06_evolucao_pecuaria.py, que trata as 5 especies
+# separadamente).
+efetivo_ano = ppm_mun[(ppm_mun["ano_codigo"] == ANO_REF) & (ppm_mun["tipo_rebanho_codigo"] == "2670")].groupby(
+    ["territorio_codigo", "territorio_nome"])["valor"].sum().rename("efetivo_bovino_cab")
 
 pib_mun = pib[pib["nivel_territorial_codigo"] == "N6"]
 pib_wide_ano = pib_mun[pib_mun["ano_codigo"] == ANO_REF].pivot_table(
@@ -115,12 +131,12 @@ print(f"\nVisualização 2 — municípios com PAM+PPM+PIB completos em {ANO_REF
 
 fig2, ax2 = plt.subplots(figsize=(7.5, 5.5))
 sizes = 15 + (viz2["participacao_vab_agro_pct"].clip(lower=0)) * 6
-sc = ax2.scatter(viz2["qtd_produzida_t"] + 1, viz2["efetivo_total_cab"] + 1, s=sizes,
+sc = ax2.scatter(viz2["qtd_produzida_t"] + 1, viz2["efetivo_bovino_cab"] + 1, s=sizes,
                   c=viz2["participacao_vab_agro_pct"], cmap="viridis", alpha=0.75, edgecolor="white", linewidth=0.3)
 ax2.set_xscale("log")
 ax2.set_yscale("log")
 ax2.set_xlabel("Quantidade produzida (PAM, t/ano, escala log) — 7 produtos, soma")
-ax2.set_ylabel("Efetivo total de rebanhos (PPM, cabeças, escala log)")
+ax2.set_ylabel("Efetivo de bovinos (PPM, cabeças, escala log)")
 ax2.set_title(f"Visualização 2 (preliminar) — PAM x PPM x PIB por município, {ANO_REF}")
 cb = fig2.colorbar(sc, ax=ax2)
 cb.set_label("Participação do VAB agropecuário no VAB total (%)")
@@ -128,11 +144,11 @@ fig2.tight_layout()
 fig2.savefig("notebooks/fig_visualizacao2_dispersao.png", dpi=150)
 print("Figura salva: notebooks/fig_visualizacao2_dispersao.png")
 
-corr = viz2[["qtd_produzida_t", "efetivo_total_cab", "participacao_vab_agro_pct"]].corr(method="spearman")
+corr = viz2[["qtd_produzida_t", "efetivo_bovino_cab", "participacao_vab_agro_pct"]].corr(method="spearman")
 print("\nCorrelação de Spearman (2021):")
 print(corr)
 
 top5 = viz2.sort_values("participacao_vab_agro_pct", ascending=False).head(5)[
-    ["territorio_nome", "qtd_produzida_t", "efetivo_total_cab", "participacao_vab_agro_pct"]]
+    ["territorio_nome", "qtd_produzida_t", "efetivo_bovino_cab", "participacao_vab_agro_pct"]]
 print("\nTop 5 municípios por participação do VAB agropecuário (2021):")
 print(top5.to_string(index=False))
