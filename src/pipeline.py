@@ -4,7 +4,7 @@ from pathlib import Path
 # Local imports
 from data_loader import load_pam_data, load_ppm_data, load_pib_data
 from data_cleaner import remove_duplicates
-from data_standardizer import tratar_simbolos_ausencias
+from data_standardizer import tratar_simbolos_ausencias, padronizar_colunas_e_categorias
 
 def run_pipeline():
     print("Iniciando pipeline de preparação de dados...")
@@ -47,13 +47,18 @@ def run_pipeline():
     df_pib = remove_duplicates(df_pib, subset_keys=chaves_pib)
     
     # --- 3. Padronização ---
-    print("\n--- 3. Padronização (Tratamento de Símbolos e Ausências) ---")
+    print("\n--- 3. Padronização (Tratamento de Símbolos, Ausências, Colunas e Categorias) ---")
     print("Padronizando PAM...")
     df_pam = tratar_simbolos_ausencias(df_pam)
+    df_pam = padronizar_colunas_e_categorias(df_pam)
+    
     print("Padronizando PPM...")
     df_ppm = tratar_simbolos_ausencias(df_ppm)
+    df_ppm = padronizar_colunas_e_categorias(df_ppm)
+    
     print("Padronizando PIB...")
     df_pib = tratar_simbolos_ausencias(df_pib)
+    df_pib = padronizar_colunas_e_categorias(df_pib)
     
     # Validações Finais
     print("\n--- Validação Pós-Tratamento ---")

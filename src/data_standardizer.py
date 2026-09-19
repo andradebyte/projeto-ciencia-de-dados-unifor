@@ -1,6 +1,22 @@
 import pandas as pd
 import numpy as np
 
+def padronizar_colunas_e_categorias(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Padroniza os nomes das colunas e remove espaços em branco das categorias (textos).
+    """
+    df_treated = df.copy()
+    
+    # 1. Padronizar nomes das colunas: minúsculo, sem espaços nas bordas, e espaços internos substituídos por '_'
+    df_treated.columns = df_treated.columns.str.lower().str.strip().str.replace(' ', '_')
+    
+    # 2. Padronizar categorias (todas as colunas do tipo texto puro)
+    colunas_texto = df_treated.select_dtypes(include=['object', 'string']).columns
+    for col in colunas_texto:
+        df_treated[col] = df_treated[col].str.strip()
+        
+    return df_treated
+
 def tratar_simbolos_ausencias(df: pd.DataFrame) -> pd.DataFrame:
     """
     Trata símbolos especiais e ausências na coluna 'valor'.
