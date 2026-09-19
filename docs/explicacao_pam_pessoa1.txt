@@ -1,52 +1,81 @@
 Explicação completa do notebook notebooks/explorar-PAM.ipynb (Pessoa 1), do começo ao fim, em linguagem simples
 
 O que é a PAM?
-PAM é o nome de uma pesquisa que o IBGE faz todo ano, perguntando pra cada cidade do Brasil: "quanto você plantou, quanto colheu, quanto vendeu de cada plantação?" No nosso caso, olhamos só o Ceará, só 7 plantas (Milho, Feijão, Mandioca, Cana-de-açúcar, Banana, Castanha de caju, Melão), de 2003 até 2024. Esse notebook é tipo abrir uma caixa de Lego gigante e organizar tudo antes de começar a construir.
+PAM é o nome de uma pesquisa que o IBGE faz todo ano, perguntando pra cada cidade do Brasil: "quanto você plantou, quanto colheu, quanto vendeu de cada plantação?" No nosso caso, olhamos só o Ceará, 7 plantas (Milho, Feijão, Mandioca, Cana-de-açúcar, Banana, Castanha de caju, Melão), de 2003 até 2024 (22 anos). Esse notebook é tipo abrir uma caixa de Lego gigante e organizar tudo antes de começar a construir: primeiro confere as peças, depois procura defeito, só depois brinca de verdade.
 
 Célula 0 — Abrir as 5 caixinhas e grudar tudo numa só
-A PAM vem espalhada em 5 arquivos diferentes (um pra área plantada, um pra área colhida, um pra quantidade produzida, um pra rendimento, um pra valor da produção). Ela abriu os 5 e colou tudo numa tabela só, com 143.220 linhas, marcando de qual arquivo cada linha veio (coluna medida).
+A PAM vem espalhada em 5 arquivos diferentes (um pra área plantada, um pra área colhida, um pra quantidade produzida, um pra rendimento médio, um pra valor da produção). Ela abriu os 5 e colou tudo numa tabela só (143.220 linhas), marcando de qual arquivo cada linha veio, numa coluna nova chamada "medida".
 
 Célula 1 — Conferir se tá tudo com a cara certa
-Ela checou o "tipo" de cada coluna (número, texto...), se tem buraco vazio (nulo) e se tem linha repetida (duplicata). Resultado: sem duplicata, e a coluna valor veio como texto (não número) — isso é pista de que tem símbolo estranho escondido lá dentro.
+Checou o "tipo" de cada coluna (número, texto...) e achou algo importante: a coluna valor veio como texto (object), não como número — pista de que tem símbolo escondido lá dentro, não só dígito. Conferiu buraco vazio (nulo nativo): zero em todas as colunas. Conferiu linha repetida (duplicata): zero também. E contou quantas linhas vieram de cada um dos 5 arquivos — os 5 têm exatamente 28.644 linhas cada, ou seja, nenhum arquivo veio incompleto.
 
 Célula 2 — Contar quantos "tipos" de cada coisa existem
-Tipo contar quantas cores de Lego você tem. Achou: 186 lugares (município + estado + Brasil), 22 anos (2003 a 2024), e por aí vai — confirmando que os dados cobrem o que devia cobrir.
+Tipo contar quantas cores de Lego você tem, coluna por coluna:
+- nivel_territorial: 3 tipos (Brasil, Estado, Município) — Município sozinho tem 141.680 das 143.220 linhas
+- territorio_codigo / territorio_nome: 186 lugares diferentes (Brasil + Ceará + os 184 municípios)
+- ano_codigo / ano_nome: 22 anos, cada um com exatamente 6.510 linhas — perfeitamente parelho, nenhum ano com mais ou menos linha que outro
+- variavel_codigo / variavel_nome: 5 variáveis (as 5 medidas dos 5 arquivos), cada uma com 28.644 linhas
+- unidade: 4 tipos — Hectares (57.288, porque é usado em 2 medidas: área plantada e área colhida), Toneladas, Quilogramas por Hectare, Mil Reais
+- produto_codigo / produto_nome: os 7 produtos, cada um com exatamente 20.460 linhas — perfeitamente parelho também
+- valor: 11.749 valores diferentes (número bem variado, faz sentido pra uma coluna de medição)
 
 Célula 3 — Achar o "traço estranho"
-A coluna valor tinha um monte de "-" no lugar de número — 31.467 linhas (22% de tudo!). Ela contou onde isso mais aparece: em Melão (19.200 vezes) e Cana-de-açúcar (6.711 vezes).
+A coluna valor tinha um monte de "-" no lugar de número — 31.467 linhas, ou seja, 22% de tudo. Contou onde isso mais aparece:
+- Por arquivo (medida): quase igual em todos — area_colhida (6.314), quantidade_produzida (6.314), rendimento_medio (6.314), valor_producao (6.311), area_plantada (6.214)
+- Por produto: bem concentrado — Melão sozinho tem 19.200 dessas linhas (61% de todos os "-"), Cana-de-açúcar tem 6.711, Castanha de caju 2.052, Mandioca 1.798, Banana 1.530, Milho só 127, Feijão só 49
+- Só acontece em linhas de Município (0 linhas de Brasil ou Estado têm esse símbolo)
 
 Célula 4 (texto explicando) — Por que isso é bem mais que a tabela do PIB
-Ela anota: 22% é muito mais que os 7% que achou na tabela do PIB. E já desconfia: é porque Melão e Cana são plantas de "nicho" — poucas cidades plantam.
+Ela anota: 22% é muito mais que os 7% que achou na tabela do PIB. Já desconfia do motivo: Melão e Cana são plantas de "nicho" — poucas cidades plantam esse tipo de coisa.
 
 Célula 5 — Investigar a causa de verdade
-Ela foi atrás do motivo: será que é erro, ou é porque a cidade nunca plantou aquilo? Contou, produto por produto, quantos municípios NUNCA tiveram nenhum valor em 22 anos. Resultado: Milho e Feijão = 0 cidades sem plantar nunca. Melão = 162 de 184 cidades nunca plantaram!
+Foi atrás do motivo, produto por produto: contou quantos municípios (de 184) NUNCA tiveram nenhum valor numérico em 22 anos inteiros, olhando a medida área colhida. Resultado:
+- Milho: 0 de 184 municípios nunca reportaram
+- Feijão: 0 de 184
+- Mandioca: 2 de 184
+- Cana-de-açúcar: 39 de 184
+- Banana: 6 de 184
+- Castanha de caju: 7 de 184
+- Melão: 162 de 184 — ou seja, só 22 cidades do Ceará já plantaram melão alguma vez em 22 anos
 
 Célula 6 (texto) — A conclusão
-O "-" não é "dado perdido" tipo esquecimento — é "essa cidade não faz essa plantação, ponto". Diferente do "..." do PIB, que significa "ainda não calcularam esse número".
+O "-" aqui não é "dado perdido" tipo esquecimento de quem preencheu a pesquisa — é "essa cidade não faz essa plantação, ponto final". É estrutural (característica permanente daquele município), não atraso de apuração. Diferente do "..." usado na tabela do PIB, que significa "ainda não calcularam esse número" (isso sim pode mudar com o tempo).
 
 Célula 7 — Consertar o texto pra virar número de verdade
-Transformou aquele "-" (que era texto) em "vazio de verdade" (NaN), pra dar pra fazer conta matemática depois.
+Transformou aquele "-" (que era texto) em "vazio de verdade" (NaN do pandas), usando pd.to_numeric. Depois do conserto, a coluna valor virou float64 (número decimal de verdade), e agora sim aparecem os 31.467 nulos contados oficialmente na coluna (antes eles estavam escondidos como texto "-").
 
 Célula 8 — Bater todos os números de novo, com lupa
-Conferiu se ano_codigo e ano_nome são sempre iguais (são), se cada arquivo tem exatamente a quantidade de linha esperada (186 lugares × 22 anos × 7 produtos = 28.644 — bateu certinho nos 5 arquivos), e se todo nome de cidade termina com " - CE" (sim, nenhuma faltando).
+Uma bateria de conferências finais:
+- ano_codigo é sempre igual a ano_nome, em 100% das linhas — sem inconsistência de tipo de data
+- Cada um dos 5 arquivos tem exatamente a quantidade esperada de linha: 186 territórios × 22 anos × 7 produtos = 28.644 — bateu certinho nos 5 (area_colhida, area_plantada, quantidade_produzida, rendimento_medio, valor_producao)
+- Nenhum município ficou sem o sufixo " - CE" no nome (lista de exceção veio vazia)
+- variavel_codigo aponta sempre pro mesmo variavel_nome (1:1) — confirmado
+- produto_codigo aponta sempre pro mesmo produto_nome (1:1) — confirmado
 
 Célula 9 (texto) — "Tudo arrumadinho"
-Resumo: schema 100% consistente, nada faltando por erro.
+Resumo: schema 100% consistente nos 5 arquivos, nada faltando por erro de carga ou de digitação.
 
 Célula 10 — Achar quem é "gigante demais" em cada plantação
-Usou uma régua estatística (IQR) pra achar cidades que produzem muito mais que a maioria em cada produto. Achou de 7,2% (Melão) até 17,6% (Banana) de cidades "fora da curva".
+Usou uma régua estatística chamada IQR (intervalo interquartil) pra achar cidades que produzem muito mais que a maioria, olhando só a medida valor_producao e só município (porque comparar com Brasil/Estado junto ia distorcer a régua). Resultado, produto por produto:
+- Milho: 384 outliers de 4.019 valores (9,6%)
+- Feijão: 321 de 4.038 (7,9%)
+- Mandioca: 480 de 3.688 (13,0%)
+- Cana-de-açúcar: 425 de 2.705 (15,7%)
+- Banana: 659 de 3.742 (17,6%) — maior proporção de todas
+- Castanha de caju: 603 de 3.625 (16,6%)
+- Melão: 15 de 208 (7,2%) — menor proporção, mas também é o produto com menos dado disponível
 
 Célula 11 (texto) — O que isso quer dizer
-Cada plantação tem seu próprio grupinho de cidades campeãs — não é sempre a mesma.
+A proporção de outlier varia bastante (7,2% a 17,6%) — mais concentrado que na tabela do PIB (que tinha 11%). Ou seja, a produção agrícola municipal é ainda mais desigual entre cidades do que a economia em geral: cada plantação tem seu próprio grupinho de cidades campeãs, que puxa a média muito pra cima.
 
 Célula 12 — Desenhar como a produção se distribui
-Fez 2 gráficos (um normal, um em escala log) mostrando quanto cada cidade produziu no total em 2024 — pra ver se são poucas cidades gigantes e muitas pequenas, ou se é mais parecido entre todas.
+Fez 2 gráficos lado a lado mostrando quanto cada cidade produziu no total (soma dos 7 produtos) em 2024: um em escala normal (linear) e outro em escala log. No linear, a maioria das cidades fica espremida perto de zero e só algumas poucas aparecem bem à direita (é o formato clássico de "poucos gigantes, muitos pequenos"); no log, a distribuição fica mais espalhada e mais fácil de comparar as cidades médias entre si.
 
 Células 13-14 (texto + gráfico) — A linha do tempo de cada plantação
-Desenhou como o valor de cada produto mudou de 2003 a 2024, no Ceará inteiro. Milho era o líder em 2003 e caiu pra 4º lugar; Banana era pequena e virou a maior de todas em 2024.
+Desenhou como o valor de produção de cada um dos 7 produtos mudou entre 2003 e 2024, pro Ceará inteiro (não soma dos municípios, vem pronto nesse nível territorial da própria tabela). Eixo Y em escala log porque os produtos têm valores de ordens de grandeza bem diferentes entre si — sem log, os produtos menores ficariam achatados no gráfico. O que apareceu: Milho era o líder em valor em 2003 (R$ 282 mil) mas cresceu só 1,6x até 2024 e caiu pra 4º lugar; Banana era a 5ª colocada em 2003 (R$ 104 mil) e virou a líder disparada em 2024 (R$ 905 mil, 8,7x de crescimento); Castanha de caju teve uma queda forte entre 2003 e 2010 (de R$ 107 mil pra R$ 54 mil) e recuperou depois.
 
 Célula 15 — Testar se dá pra juntar com a tabela do PIB no futuro
-Verificou se o "crachá" (código do município) da PAM é o mesmo usado na tabela do PIB. Bateu 100%. Só achou um aviso: PAM vai até 2024, PIB só até 2023 — então quem for juntar as duas precisa cortar no ano que as duas têm em comum.
+Verificou duas coisas importantes pra um cruzamento futuro: se o "crachá" (territorio_codigo) da PAM é exatamente o mesmo conjunto usado na tabela do PIB — bateu 100% (186 = 186, nenhum código sobrando de nenhum lado); e comparou o intervalo de anos das duas — PAM vai de 2003 até 2024, PIB só vai de 2003 até 2023. Ou seja, tem 1 ano a mais na PAM (2024) que não existe no PIB.
 
 Célula 16 (texto) — Anotação final desse aviso
-Deixou escrito pra não esquecer esse detalhe na hora de cruzar as tabelas depois.
+Deixou escrito, pra não esquecer na hora de cruzar as tabelas depois: cortar pro intervalo comum (2003-2023) antes de qualquer merge com o PIB, senão sobra linha de 2024 sem par do outro lado.

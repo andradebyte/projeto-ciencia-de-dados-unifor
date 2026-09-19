@@ -1,0 +1,117 @@
+Explicação completa dos notebooks da Pessoa 3 — notebooks/explorar-PIB.ipynb e notebooks/cruzamento_pib_pam_ppm.ipynb, do começo ao fim, em linguagem simples
+
+O que é a tabela do PIB (t5938)?
+É outra pesquisa do IBGE, mas em vez de perguntar sobre plantação, ela mede o "tamanho da economia" de cada município — quanto dinheiro cada cidade movimenta no total (PIB) e quanto disso vem da agropecuária (VAB agropecuário). Cobre o Ceará, de 2003 até 2023 (21 anos — 1 ano a menos que a PAM e a PPM). A Pessoa 3 tem 2 responsabilidades: organizar essa tabela sozinha (inventário) e depois juntar ela com a PAM e a PPM (o cruzamento).
+
+PARTE 1 — notebooks/explorar-PIB.ipynb (inventário da tabela do PIB)
+
+Célula 0 — Abrir a caixa
+Carregou o arquivo t5938_pib_agropecuaria_2003_2023_ce_br.csv: 15.624 linhas, 10 colunas.
+
+Célula 1 — Conferir se tá tudo com a cara certa
+Sem duplicata (0), sem buraco vazio nativo (0 NaN em todas as colunas) — mas a coluna valor veio como texto, mesma pista de antes: tem símbolo escondido.
+
+Célula 2 — Contar quantos "tipos" de cada coisa existem
+- nivel_territorial: 3 tipos (Brasil, Estado, Município) — Município tem 15.456 das 15.624 linhas
+- territorio_codigo / territorio_nome: 186 lugares (igual à PAM)
+- ano_codigo / ano_nome: 21 anos (2003-2023), cada um com exatamente 744 linhas — perfeitamente parelho
+- variavel_codigo (4 tipos): PIB, VAB total, VAB agropecuária, Participação da agropecuária no VAB (%)
+
+Célula 3 — Achar o símbolo estranho
+Achou 1.116 linhas com "..." no lugar de número (bem diferente do "-" da PAM). Concentrado em 3 variáveis: VAB total (372), VAB agropecuária (372), Participação (372) — e só nos anos 2022 (558) e 2023 (558). Aparece em Município (1.104), Brasil (6) e Estado (6).
+
+Célula 4 (texto) — Por que isso acontece
+1.116 linhas (7,1% do total) têm "...". É porque o IBGE ainda não fechou a conta do VAB pra 2022 e 2023 — o PIB "puro" (a variável principal) está 100% completo nos 21 anos; só as 3 variáveis derivadas do VAB é que ficam incompletas nos 2 últimos anos.
+
+Célula 5 — Checar N/A de todas as formas possíveis
+Conferiu, coluna por coluna, tanto NaN nativo quanto os marcadores de texto do IBGE ("...", "-", "..", "X", vazio). Resultado: só a coluna valor tem N/A, e só por causa do "..." (1.116, igual à célula 3).
+
+Célula 6 — Consertar o texto pra virar número de verdade
+Transformou "..." em NaN de verdade com pd.to_numeric, e rodou um describe() pra ver a estatística básica de cada variável (média, mínimo, máximo etc).
+
+Célula 7 — Listar todos os valores únicos de cada coluna
+Conferência bruta: lista completa de códigos de território, anos, variáveis — pra bater olho e ver se não tem nada fora do esperado.
+
+Célula 8 — Conferir a unidade de cada variável
+Unidade é "Mil Reais" em 11.718 linhas e "%" em 3.906 linhas — confirma que a variável de Participação é a única em porcentagem, as outras 3 (PIB, VAB total, VAB agro) são todas em dinheiro.
+
+Célula 9 — Conferir o intervalo de anos
+Ano mínimo 2003, ano máximo 2023 — bate com o nome do arquivo.
+
+Célula 10 — Listar quais colunas são "código" (podem servir de chave)
+nivel_territorial_codigo, territorio_codigo, ano_codigo, variavel_codigo.
+
+Células 11-12 (texto + gráfico) — Evolução do PIB: Ceará x top 10 municípios
+Gráfico com o PIB do Ceará inteiro (linha preta) contra os 10 municípios de maior PIB em 2023, de 2003 a 2023, em escala log. Achado: PIB do Ceará cresce 7,1x (R$ 32,7 bi → R$ 232,2 bi). Fortaleza segue líder, mas cresce mais devagar que a maioria do top 10 (5,7x): sua fatia do PIB estadual cai de 46,6% pra 37,4% — indício de desconcentração relativa. Destaque isolado: São Gonçalo do Amarante salta 70x (R$ 98,7 mi → R$ 6,9 bi), coerente com a instalação do Complexo Industrial e Portuário do Pecém no período.
+
+Célula 13 — Desenhar como o PIB municipal se distribui
+2 histogramas (linear e log) do PIB de todos os municípios em 2023 — mesmo formato "poucos gigantes, muitos pequenos" que apareceu na PAM.
+
+Célula 14 — Bater os números de novo, com lupa
+ano_codigo sempre igual a ano_nome (100%). Linhas esperadas (186 territórios × 21 anos × 4 variáveis) = 15.624, linhas reais = 15.624 — bate exato. Nenhuma combinação território-ano com menos de 4 variáveis.
+
+Célula 15 (texto) — "Tudo arrumadinho"
+Schema 100% consistente: 15.624 linhas batem exato com o esperado, nenhuma combinação território-ano incompleta.
+
+Célula 16 — Achar quem é "gigante demais", separado por nível
+Diferente da PAM, aqui ela separou Brasil, Estado e Município antes de procurar outlier (porque misturar ia distorcer a régua). Resultado em Município: PIB tem 442 outliers de 3.864 (11,4%), VAB total 397 de 3.496, VAB agro 254 de 3.496, Participação 79 outliers.
+
+Célula 17 — Comparar antes x depois de remover outliers
+Se removesse os 442 outliers de PIB (via IQR), sobrariam 13.180 linhas de 15.456 (removeria 2.276 no total, somando as 4 variáveis) — e mostrou a estatística (média, desvio-padrão etc) antes dessa remoção.
+
+Célula 18 — Mostrar quem são os outliers de verdade
+Limite do IQR pro PIB: entre -296.604 e 661.361 (Mil Reais). 442 linhas ficam fora disso (removidos), 3.422 dentro (mantidos). Os 10 maiores "outliers" são todos Fortaleza, em anos diferentes (de 2023 com R$ 86,9 bi até 2014 com R$ 56,1 bi) — ou seja, não é erro, é sempre a mesma cidade sendo grande demais todo ano.
+
+Célula 19 (texto) — A conclusão mais importante desse notebook
+Outlier aqui NÃO é erro — é concentração econômica real. Os 442 "outliers" de PIB municipal (11,4%) são quase todos Fortaleza em anos diferentes. Por isso, o método estatístico IQR não é o jeito certo de "limpar" essa variável (não dá pra simplesmente jogar fora).
+
+Célula 20 — Conferir se código sempre aponta pro mesmo nome
+nivel_territorial_codigo → nivel_territorial_nome: 1:1, OK. variavel_codigo → variavel_nome: 1:1, OK.
+
+Célula 21 — Conferir completude de cada município, um por um
+184 municípios distintos, todos com exatamente 84 linhas (21 anos × 4 variáveis) — sem buraco escondido em nenhum município específico. Todo nome termina em " - CE", nenhum não-município tem esse sufixo por engano.
+
+Célula 22 (texto) — "Completude 100%"
+Os 184 municípios têm exatamente 84 linhas cada, sem buraco estrutural, sem confusão entre níveis territoriais.
+
+Célula 23 (texto) — Resumo final do inventário
+Fecha tudo: 15.624 linhas x 10 colunas sem duplicata, chave território×ano×variável, 4 colunas-código todas 1:1 confirmadas, 4 variáveis (PIB/VAB total/VAB agro em Mil Reais, Participação em %), N/A só por "..." nos anos 2022-2023 das 3 variáveis derivadas, outlier = concentração real (não erro), e a chave pronta pra juntar com PAM/PPM/geojson é territorio_codigo + ano_nome (confirmado que bate até com o codarea do arquivo geográfico dos municípios).
+
+PARTE 2 — notebooks/cruzamento_pib_pam_ppm.ipynb (o cruzamento reproduzível, responsabilidade da Pessoa 3)
+
+O que é "cruzar" 3 tabelas?
+É pegar a caixa do PIB, a caixa da PAM e a caixa da PPM (efetivo de bovino) e juntar todas numa única tabela, linha por linha, usando sempre o mesmo "crachá": territorio_codigo + ano_codigo. Antes de juntar, cada caixa precisa ficar com só 1 linha por município-ano (por isso primeiro cada uma foi resumida/agregada).
+
+Célula 4 — Preparar o PIB
+Pegou a tabela do PIB (já filtrada só município) e "abriu" as 4 variáveis em 4 colunas separadas (PIB, VAB_total, VAB_agro, participacao_agro) — antes elas estavam empilhadas.
+
+Célula 6 — Preparar a PAM
+Somou o valor da produção dos 7 produtos, virando 1 número só por município-ano (valor_producao_agricola_total). Pode somar aqui porque é tudo dinheiro (mesma unidade) — diferente de somar quantidade produzida de produtos diferentes, que o projeto proíbe.
+
+Célula 8 — Preparar a PPM
+Pegou só o efetivo de Bovino (não soma as espécies diferentes, porque cabeça de boi e cabeça de galinha não são a mesma coisa).
+
+Célula 10 — Conferir se os 3 anos batem
+PIB vai de 2003 a 2023. PAM e PPM vão de 2003 a 2024. Ou seja, PAM/PPM têm 1 ano a mais (2024) que o PIB não tem — já esperado.
+
+Célula 12 — Primeiro cruzamento: PIB + PAM
+Juntou as duas usando o crachá territorio_codigo + ano_codigo, com validate="one_to_one" (trava o programa se achar crachá repetido em alguma das duas caixas — não achou, rodou liso). Resultado: 3.864 linhas bateram nas duas ("both"), 184 linhas só na PAM ("right_only", são os anos de 2024 que o PIB não tem), 0 linhas só no PIB.
+
+Célula 14 — Segundo cruzamento: (PIB+PAM) + PPM
+Juntou o resultado anterior com a PPM, mesmo crachá, mesma trava de segurança. Resultado: as 4.048 linhas bateram perfeitamente nas duas ("both"), 0 sobrando de qualquer lado — porque PAM e PPM têm exatamente o mesmo intervalo de anos (2003-2024).
+
+Célula 16 — A tabela-resumo final
+Linhas na base original: PIB=3.864, PAM=4.048, PPM=4.048. Linhas no cruzamento final: as mesmas. Porcentagem presentes nas 3 bases ao mesmo tempo: PIB=100% (todas as linhas de PIB acham par nas outras 2), PAM=95,5%, PPM=95,5% (essas duas têm 184 linhas de 2024 que ficam sem PIB).
+
+Célula 17 — Onde estão as linhas incompletas
+184 linhas do cruzamento não têm as 3 bases juntas — e são TODAS do ano de 2024 (nenhuma espalhada em outro ano). Confirma que não é erro de chave, é só a defasagem já esperada do PIB.
+
+Célula 19 — Salvar o resultado pronto pra usar depois
+Salvou a tabela final (4.048 linhas, 13 colunas) em dados/processed/cruzamento_pib_pam_ppm.parquet, e também uma tabela auxiliar da PAM por produto (28.336 linhas, 4 colunas) em dados/processed/pam_valor_producao_produto.parquet — pra quem for usar depois não precisar reprocessar tudo de novo.
+
+Resumo rápido do cruzamento:
+Chave: territorio_codigo + ano_codigo
+Cardinalidade esperada: 1:1 em cada base (garantida com validate="one_to_one")
+Universo do cruzamento (união de anos): 4.048 linhas (184 municípios x 22 anos, 2003-2024)
+Correspondência completa (as 3 bases juntas): 3.864 linhas (95,5%), travada nos 21 anos do PIB
+Não-correspondência: 184 linhas (4,5%), 100% concentradas em 2024 — defasagem temporal conhecida, não erro

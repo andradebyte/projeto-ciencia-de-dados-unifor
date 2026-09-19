@@ -1,0 +1,17 @@
+O que é VAB (Valor Adicionado Bruto)
+
+VAB é quanto de riqueza nova um setor da economia gera num lugar, num período — é a base de cálculo do PIB. Cada setor (agropecuária, indústria, serviços) soma o que produziu menos o que gastou pra produzir (matéria-prima, insumo), e a soma de todos os setores mais os impostos dá o PIB.
+
+Na tabela do PIB (t5938) só existe 1 sigla com V: VAB — usada em 2 escopos diferentes, não são siglas diferentes:
+
+- VAB_total: soma da riqueza gerada por TODOS os setores do município junto (agropecuária + indústria + serviços)
+- VAB_agro: só a fatia gerada pela agropecuária (é um subconjunto de dentro do VAB_total, não um número separado)
+- participacao_agro (%): VAB_agro dividido por VAB_total, vezes 100 — é o indicador de quanto aquele município depende economicamente da agropecuária. Não é sigla, é conta feita em cima das outras duas.
+
+As 4 variáveis da tabela do PIB são, então: PIB, VAB_total, VAB_agro, participacao_agro.
+
+Por que é diferente do PIB
+PIB é o valor final de tudo que foi produzido, já somando os impostos sobre produtos. VAB é a peça que forma o PIB por dentro, setor por setor, antes de somar os impostos. Por isso a tabela do IBGE traz PIB e VAB separados: o PIB sozinho não diz quanto vem de cada setor, só o VAB mostra isso.
+
+Limitação encontrada na nossa base (t5938)
+VAB_total, VAB_agro e participacao_agro ficam sem valor (símbolo "...") nos anos 2022 e 2023 — o IBGE ainda não fechou essas contas. O PIB total (sem quebrar por setor) está completo em todos os 21 anos (2003-2023). Por isso o projeto usa 2021 como o último ano confiável pra qualquer análise que dependa do VAB/participação.
