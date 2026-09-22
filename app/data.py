@@ -5,12 +5,19 @@ suinos e galinaceos NAO sao unidades equivalentes e NUNCA devem ser somados
 entre si. Cada especie e tratada em serie propria, do carregamento aos KPIs.
 """
 
+import json
 from pathlib import Path
 
 import pandas as pd
 
 RAW_DIR = Path(__file__).resolve().parent.parent / "data" / "dados_originais"
 PPM_FILE = RAW_DIR / "t3939_ppm_efetivo_rebanhos_2003_2024_ce_br.csv"
+MALHA_FILE = (
+    Path(__file__).resolve().parent.parent
+    / "data"
+    / "dados_comuns"
+    / "malha_municipal_ce_2022.geojson"
+)
 
 SIDRA_NA = {"...": pd.NA, "..": pd.NA, "X": pd.NA}
 SIDRA_ZERO = {"-": 0.0}
@@ -77,3 +84,58 @@ def kpi_por_especie(ppm: pd.DataFrame) -> pd.DataFrame:
 
 def n_municipios(ppm: pd.DataFrame) -> int:
     return ppm.loc[ppm["nivel_territorial_codigo"] == "N6", "territorio_codigo"].nunique()
+
+
+def load_malha() -> dict:
+    """Malha municipal do Ceará (GeoJSON, IBGE, 2022).
+
+    Dado geográfico auxiliar (data/dados_comuns/README_DADOS_COMUNS.md): não
+    conta como uma das três tabelas SIDRA exigidas para integração. A chave
+    de junção é a propriedade `codarea` (código IBGE de 7 dígitos).
+    """
+    with open(MALHA_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def validar_codarea(malha: dict, ppm: pd.DataFrame) -> dict:
+    """Correspondência entre `codarea` (malha) e `territorio_codigo` (PPM, N6).
+
+    Retorna contagens e os códigos sem par de cada lado, para demonstrar que a
+    integração geográfica por código IBGE é efetiva e não apenas nominal.
+    """
+    codigos_malha = {feat["properties"]["codarea"] for feat in malha["features"]}
+    codigos_ppm = set(ppm.loc[ppm["nivel_territorial_codigo"] == "N6", "territorio_codigo"])
+    return {
+        "n_malha": len(codigos_malha),
+        "n_ppm": len(codigos_ppm),
+        "correspondentes": len(codigos_malha & codigos_ppm),
+        "somente_malha": sorted(codigos_malha - codigos_ppm),
+        "somente_ppm": sorted(codigos_ppm - codigos_malha),
+    }
+
+
+def ppm_por_municipio(ppm: pd.DataFrame, especie: str, ano: int) -> pd.DataFrame:
+    """Efetivo por município (N6) de uma espécie em um ano, ranqueado.
+
+    Uma única espécie por chamada: rebanhos de espécies distintas não são
+    unidades equivalentes e nunca são somados (data/README_DADOS.md item 5).
+    """
+    sub = ppm.loc[
+        (ppm["nivel_territorial_codigo"] == "N6")
+        & (ppm["especie"] == especie)
+        & (ppm["ano_codigo"] == ano),
+        ["territorio_codigo", "territorio_nome", "valor"],
+    ].rename(
+        columns={
+            "territorio_codigo": "codigo_ibge",
+            "territorio_nome": "municipio",
+            "valor": "efetivo_cab",
+        }
+    )
+    sub = sub.astype({"efetivo_cab": "int64"}).sort_values(
+        "efetivo_cab", ascending=False
+    ).reset_index(drop=True)
+    sub.insert(0, "ranking", range(1, len(sub) + 1))
+    total = sub["efetivo_cab"].sum()
+    sub["participacao_pct"] = (sub["efetivo_cab"] / total * 100).round(2) if total > 0 else 0.0
+    return sub
