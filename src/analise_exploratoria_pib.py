@@ -43,11 +43,29 @@ df_pib_sem_codigo['territorio_nome'].value_counts()
 # In[5]:
 
 
+df_pib_sem_codigo.groupby('variavel_nome')['valor'].describe()
+
+
+# In[6]:
+
+
+print("Valores nulos:", df_pib_sem_codigo['valor'].isna().sum())
+print("Valores inibidos (sigilo do IBGE):", df_pib_sem_codigo['valor_is_inibido'].sum())
+print("Linhas duplicadas:", df_pib_sem_codigo.duplicated().sum())
+print()
+print("Nulos por variável:")
+print(df_pib_sem_codigo[df_pib_sem_codigo['valor'].isna()].groupby('variavel_nome').size())
+print("Anos com nulos:", sorted(df_pib_sem_codigo[df_pib_sem_codigo['valor'].isna()]['ano_nome'].unique()))
+
+
+# In[7]:
+
+
 print(f"Menor ano: {df_pib_sem_codigo['ano_nome'].min()}")
 print(f"Maior ano: {df_pib_sem_codigo['ano_nome'].max()}")
 
 
-# In[6]:
+# In[8]:
 
 
 anos_disponiveis = sorted(int(a) for a in df_pib_sem_codigo['ano_nome'].unique())
@@ -59,7 +77,7 @@ print(anos_disponiveis)
 
 # Como o PIB do Brasil e do Ceará evoluíram entre 2003 e 2023?
 
-# In[7]:
+# In[9]:
 
 
 import matplotlib.pyplot as plt
@@ -110,13 +128,13 @@ ax.legend(frameon=False)
 plt.show()
 
 
-# In[8]:
+# In[10]:
 
 
 pib_pivot = pib_bc.pivot(index="ano_nome", columns="territorio_nome", values="valor")
 
 
-# In[9]:
+# In[11]:
 
 
 razao_valor = pib_pivot["Brasil"] / pib_pivot["Ceará"]
@@ -125,7 +143,7 @@ for ano, razao in razao_valor.items():
     print(f"{ano}: PIB do Brasil é {razao:.2f}x o PIB do Ceará")
 
 
-# In[10]:
+# In[12]:
 
 
 crescimento = {}
@@ -140,7 +158,7 @@ print(f"Ceará cresceu {crescimento['Ceará']:.2f}x (2003 -> 2023)")
 print(f"Brasil cresceu {crescimento['Brasil'] / crescimento['Ceará']:.2f}x mais que o Ceará")
 
 
-# In[11]:
+# In[13]:
 
 
 valores = {}
@@ -165,7 +183,7 @@ print(f"Diferença 2023: {formata_reais(dif_2023)} ({vezes_2023:.2f}x)")
 
 # Quantas vezes o PIB de cada um cresceu, ano a ano, em relação a 2003?
 
-# In[12]:
+# In[14]:
 
 
 import numpy as np
@@ -194,7 +212,7 @@ ax.legend(frameon=False)
 plt.show()
 
 
-# In[13]:
+# In[15]:
 
 
 razao_crescimento = cresc_por_ano["Brasil"] / cresc_por_ano["Ceará"]
@@ -208,7 +226,7 @@ for ano in cresc_por_ano.index:
 
 # Quantas vezes o PIB do Brasil é maior que o do Ceará, em cada ano?
 
-# In[14]:
+# In[16]:
 
 
 fig, ax = plt.subplots(figsize=(12, 5))
@@ -227,7 +245,7 @@ ax.spines[["top", "right"]].set_visible(False)
 plt.show()
 
 
-# In[15]:
+# In[17]:
 
 
 ano_maior = razao_valor.idxmax()
@@ -237,7 +255,7 @@ print(f"Maior razão: {ano_maior} — Brasil {razao_valor.loc[ano_maior]:.2f}x o
 print(f"Menor razão: {ano_menor} — Brasil {razao_valor.loc[ano_menor]:.2f}x o Ceará")
 
 
-# In[16]:
+# In[18]:
 
 
 participacao_ceara = (pib_pivot["Ceará"] / pib_pivot["Brasil"]) * 100
@@ -248,7 +266,7 @@ for ano, pct in participacao_ceara.items():
 
 # Qual a participação do Ceará no PIB do Brasil, ano a ano?
 
-# In[17]:
+# In[19]:
 
 
 anos_pct = participacao_ceara.index
@@ -279,7 +297,7 @@ plt.show()
 
 # Como essa participação do Ceará mudou entre 2003 e 2023?
 
-# In[18]:
+# In[20]:
 
 
 anos_resumo = [2003, 2023]
@@ -320,7 +338,7 @@ plt.show()
 
 # ## PIB — Municípios do Ceará
 
-# In[19]:
+# In[21]:
 
 
 df_municipios = df_pib_sem_codigo[df_pib_sem_codigo["nivel_territorial_nome"] == "Município"].copy()
@@ -331,7 +349,7 @@ print(f"Municípios únicos: {df_municipios['territorio_nome'].nunique()}")
 df_municipios.head()
 
 
-# In[20]:
+# In[22]:
 
 
 qtd_2003 = (df_municipios["ano_nome"] == 2003).sum()
@@ -343,13 +361,13 @@ print(f"Maior valor: {df_municipios['valor'].max()}")
 print(f"Menor valor: {df_municipios['valor'].min()}")
 
 
-# In[21]:
+# In[23]:
 
 
 df_municipios["unidade"].value_counts()
 
 
-# In[22]:
+# In[24]:
 
 
 df_municipios_pct = df_municipios[df_municipios["unidade"] == "%"].copy()
@@ -358,7 +376,7 @@ print(f"Total de linhas: {df_municipios_pct.shape[0]}")
 df_municipios_pct.head(10)
 
 
-# In[23]:
+# In[25]:
 
 
 territorios_pct = set(df_municipios[df_municipios["unidade"] == "%"]["territorio_nome"])
@@ -370,7 +388,7 @@ print(f"Territórios com Mil Reais: {len(territorios_reais)}")
 print(f"Territórios com os dois: {len(territorios_ambos)}")
 
 
-# In[24]:
+# In[26]:
 
 
 df_municipios_reais = df_municipios[df_municipios["unidade"] == "Mil Reais"].copy()
@@ -379,7 +397,7 @@ print(f"Total de linhas: {df_municipios_reais.shape[0]}")
 df_municipios_reais.head()
 
 
-# In[25]:
+# In[27]:
 
 
 territorios_municipios = sorted(df_municipios_reais["territorio_nome"].unique())
@@ -387,7 +405,7 @@ print(f"Total de territórios: {len(territorios_municipios)}")
 print(territorios_municipios)
 
 
-# In[26]:
+# In[28]:
 
 
 pib_municipios = df_municipios_reais[
@@ -396,43 +414,9 @@ pib_municipios = df_municipios_reais[
 pib_municipios_pivot = pib_municipios.pivot(index="ano_nome", columns="territorio_nome", values="valor")
 
 
-# Qual foi o PIB de Abaiara ao longo do período?
-
-# In[27]:
-
-
-municipio_escolhido = "Abaiara - CE"
-serie_municipio = pib_municipios_pivot[municipio_escolhido]
-
-fig, ax = plt.subplots(figsize=(10, 5))
-ax.plot(serie_municipio.index, serie_municipio.values, color="#2a78d6", linewidth=2, marker="o", markersize=4, label=municipio_escolhido)
-
-primeiro_ano, ultimo_ano = serie_municipio.index.min(), serie_municipio.index.max()
-ax.annotate(
-    formata_reais(serie_municipio.loc[primeiro_ano]),
-    (primeiro_ano, serie_municipio.loc[primeiro_ano]),
-    textcoords="offset points", xytext=(0, 10), ha="left", fontsize=9, color="#2a78d6",
-)
-ax.annotate(
-    formata_reais(serie_municipio.loc[ultimo_ano]),
-    (ultimo_ano, serie_municipio.loc[ultimo_ano]),
-    textcoords="offset points", xytext=(0, 10), ha="right", fontsize=9, color="#2a78d6",
-)
-
-ax.set_xlabel("Ano")
-ax.set_ylabel("PIB a preços correntes (Mil Reais)")
-ax.set_title(f"PIB — {municipio_escolhido} (2003–2023)")
-ax.set_xticks(range(2003, 2024, 2))
-ax.grid(True, color="#e1e0d9", linewidth=0.8)
-ax.spines[["top", "right"]].set_visible(False)
-ax.legend(frameon=False)
-
-plt.show()
-
-
 # Como foi o PIB de cada um dos 184 municípios do Ceará?
 
-# In[28]:
+# In[29]:
 
 
 municipios_ordenados = pib_municipios_pivot.columns.tolist()
@@ -473,7 +457,7 @@ plt.show()
 
 # Quais os 10 municípios com maior PIB e como eles evoluíram?
 
-# In[29]:
+# In[30]:
 
 
 top10_municipios = pib_municipios_pivot.loc[2023].sort_values(ascending=False).head(10).index.tolist()
@@ -497,14 +481,14 @@ plt.show()
 
 # ### Lista de municípios
 
-# In[30]:
+# In[31]:
 
 
 for posicao, municipio in enumerate(territorios_municipios, start=1):
     print(f"{posicao:3d}. {municipio}")
 
 
-# In[31]:
+# In[32]:
 
 
 ranking_pib_2023 = pib_municipios_pivot.loc[2023].sort_values(ascending=False)
@@ -514,7 +498,7 @@ for posicao, (municipio, valor) in enumerate(ranking_pib_2023.items(), start=1):
     print(f"{posicao:3d}. {municipio}: {formata_reais(valor)}")
 
 
-# In[32]:
+# In[33]:
 
 
 ranking_pib_2003 = pib_municipios_pivot.loc[2003].sort_values(ascending=False)
@@ -524,7 +508,7 @@ for posicao, (municipio, valor) in enumerate(ranking_pib_2003.items(), start=1):
     print(f"{posicao:3d}. {municipio}: {formata_reais(valor)}")
 
 
-# In[33]:
+# In[34]:
 
 
 ranking_por_ano = pib_municipios_pivot.rank(axis=1, ascending=False, method="min").astype(int)
@@ -535,7 +519,7 @@ for ano, posicao in posicoes_baturite.items():
     print(f"{ano}: posição {posicao} de {pib_municipios_pivot.shape[1]} — {formata_reais(valor)}")
 
 
-# In[34]:
+# In[35]:
 
 
 crescimento_municipios = (pib_municipios_pivot.loc[2023] / pib_municipios_pivot.loc[2003]).sort_values(ascending=False)
@@ -549,7 +533,7 @@ for posicao, (municipio, fator) in enumerate(top10_mais_cresceram.items(), start
 
 # Quais municípios mais cresceram em PIB entre 2003 e 2023?
 
-# In[35]:
+# In[36]:
 
 
 cores_top10 = plt.colormaps["tab10"].colors
@@ -571,7 +555,7 @@ ax.legend(frameon=False, fontsize=8, loc="upper left")
 plt.show()
 
 
-# In[36]:
+# In[37]:
 
 
 top10_menos_cresceram = crescimento_municipios.tail(10).sort_values()
@@ -583,7 +567,7 @@ for posicao, (municipio, fator) in enumerate(top10_menos_cresceram.items(), star
 
 # Quais municípios menos cresceram em PIB entre 2003 e 2023?
 
-# In[37]:
+# In[38]:
 
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -605,7 +589,7 @@ plt.show()
 
 # Qual foi o de Baturité nesse período?
 
-# In[38]:
+# In[39]:
 
 
 serie_baturite = pib_municipios_pivot["Baturité - CE"]
@@ -640,7 +624,7 @@ plt.show()
 
 # Existem outliers no PIB dos municípios? Como é a distribuição por ano?
 
-# In[39]:
+# In[40]:
 
 
 dados_boxplot = [pib_municipios_pivot.loc[ano].dropna().values for ano in pib_municipios_pivot.index]
@@ -669,7 +653,7 @@ ax.spines[["top", "right"]].set_visible(False)
 plt.show()
 
 
-# In[40]:
+# In[41]:
 
 
 for ano in pib_municipios_pivot.index:
@@ -683,7 +667,7 @@ for ano in pib_municipios_pivot.index:
     print(f"{ano}: {nomes}")
 
 
-# In[41]:
+# In[42]:
 
 
 print("Média do PIB por ano — com e sem outliers")
@@ -703,7 +687,7 @@ for ano in pib_municipios_pivot.index:
 
 # Como fica a distribuição do PIB de todos os municípios, ano a ano, em pontos?
 
-# In[42]:
+# In[43]:
 
 
 fig, ax = plt.subplots(figsize=(14, 6))
@@ -722,7 +706,7 @@ ax.spines[["top", "right"]].set_visible(False)
 plt.show()
 
 
-# In[43]:
+# In[44]:
 
 
 valores_2023 = pib_municipios_pivot.loc[2023].dropna()
@@ -740,7 +724,7 @@ for municipio, valor in outliers_2023.items():
     print(f"{municipio}: {formata_reais(valor)}")
 
 
-# In[44]:
+# In[45]:
 
 
 df_municipios_reais.describe()
@@ -748,7 +732,7 @@ df_municipios_reais.describe()
 
 # Como foi o PIB de Fortaleza, Maracanaú, Eusébio, Pacajus, Cascavel, Baturité, Guaramiranga, Quixadá e Aiuaba?
 
-# In[45]:
+# In[46]:
 
 
 cidades_escolhidas = [
@@ -784,7 +768,7 @@ ax.legend(frameon=False, fontsize=8, loc="upper left")
 plt.show()
 
 
-# In[46]:
+# In[47]:
 
 
 crescimento_escolhidas = (pib_municipios_pivot.loc[2023, cidades_disponiveis] / pib_municipios_pivot.loc[2003, cidades_disponiveis]).sort_values(ascending=False)
@@ -796,7 +780,7 @@ for municipio, fator in crescimento_escolhidas.items():
 
 # Quanto cada município representa do PIB do Ceará em 2023?
 
-# In[47]:
+# In[48]:
 
 
 participacao_municipios_2023 = (pib_municipios_pivot.loc[2023] / pib_pivot.loc[2023, "Ceará"]) * 100
@@ -825,7 +809,7 @@ plt.show()
 
 # Quanto cada município representava do PIB do Ceará em 2003?
 
-# In[48]:
+# In[49]:
 
 
 participacao_municipios_2003 = (pib_municipios_pivot.loc[2003] / pib_pivot.loc[2003, "Ceará"]) * 100
@@ -852,7 +836,7 @@ ax.spines[["top", "right"]].set_visible(False)
 plt.show()
 
 
-# In[49]:
+# In[50]:
 
 
 print("Participação de cada município no PIB do Ceará — 2023")
@@ -862,7 +846,7 @@ for municipio, pct in participacao_municipios_2023.items():
 
 # Como o PIB do Ceará se reparte entre os 184 municípios, visualmente?
 
-# In[50]:
+# In[51]:
 
 
 cmap_municipios = plt.colormaps["viridis"]
@@ -887,7 +871,7 @@ plt.show()
 
 # Como se compara o PIB de Fortaleza, Maracanaú, Caucaia e São Gonçalo do Amarante?
 
-# In[51]:
+# In[52]:
 
 
 cidades_investigar = ["Fortaleza - CE", "Maracanaú - CE", "Caucaia - CE", "São Gonçalo do Amarante - CE"]
@@ -911,7 +895,7 @@ ax.legend(frameon=False, fontsize=8, loc="upper left")
 plt.show()
 
 
-# In[52]:
+# In[53]:
 
 
 crescimento_todos = pd.concat([
@@ -926,7 +910,7 @@ print(f"Maior crescimento de PIB (2003 -> 2023) entre Brasil, Ceará e os {len(c
 print(f"{territorio_maior_crescimento}: {fator_maior_crescimento:.2f}x")
 
 
-# In[53]:
+# In[54]:
 
 
 print("CAGR — taxa de crescimento anual composta (2003 -> 2023)")
@@ -938,7 +922,7 @@ for municipio in cidades_investigar:
     print(f"{municipio}: {cagr * 100:.2f}% ao ano")
 
 
-# In[54]:
+# In[55]:
 
 
 print("Ano do maior salto (maior crescimento % de um ano pro outro)")
@@ -954,7 +938,7 @@ for municipio in cidades_investigar:
 
 # Qual a variação percentual anual do PIB dessas 4 cidades?
 
-# In[55]:
+# In[56]:
 
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -975,7 +959,7 @@ ax.legend(frameon=False, fontsize=8, loc="upper left")
 plt.show()
 
 
-# In[56]:
+# In[57]:
 
 
 correlacao = pib_municipios_pivot[cidades_investigar].pct_change().dropna().corr()
@@ -985,7 +969,7 @@ correlacao
 
 # Como mudou a posição no ranking de PIB dessas 4 cidades ao longo do tempo?
 
-# In[57]:
+# In[58]:
 
 
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -1009,7 +993,7 @@ plt.show()
 
 # Como evoluiu o VAB total do Brasil e do Ceará?
 
-# In[58]:
+# In[59]:
 
 
 vab_bc = df_pib_sem_codigo[
@@ -1036,7 +1020,7 @@ ax.legend(frameon=False)
 plt.show()
 
 
-# In[59]:
+# In[60]:
 
 
 ano_final_vab = vab_pivot.index.max()
@@ -1052,7 +1036,7 @@ print(f"Brasil cresceu {crescimento_vab['Brasil'] / crescimento_vab['Ceará']:.2
 
 # Quais os 10 municípios com maior VAB total?
 
-# In[60]:
+# In[61]:
 
 
 vab_municipios = df_municipios_reais[
@@ -1080,7 +1064,7 @@ plt.show()
 
 # Quanto cada município representa do VAB total do Ceará?
 
-# In[61]:
+# In[62]:
 
 
 participacao_vab_municipios = (vab_municipios_pivot.loc[ano_vab_mun] / vab_pivot.loc[ano_vab_mun, "Ceará"]) * 100
@@ -1111,7 +1095,7 @@ plt.show()
 
 # Como evoluiu o VAB agropecuário do Brasil e do Ceará?
 
-# In[62]:
+# In[63]:
 
 
 vab_agro_bc = df_pib_sem_codigo[
@@ -1138,7 +1122,7 @@ ax.legend(frameon=False)
 plt.show()
 
 
-# In[63]:
+# In[64]:
 
 
 ano_final_vab_agro = vab_agro_pivot.index.max()
@@ -1154,7 +1138,7 @@ print(f"Brasil cresceu {crescimento_vab_agro['Brasil'] / crescimento_vab_agro['C
 
 # Quais os 10 municípios com maior VAB agropecuário?
 
-# In[64]:
+# In[65]:
 
 
 vab_agro_municipios = df_municipios_reais[
@@ -1182,7 +1166,7 @@ plt.show()
 
 # Quanto cada município representa do VAB agropecuário do Ceará?
 
-# In[65]:
+# In[66]:
 
 
 participacao_vab_agro_municipios = (vab_agro_municipios_pivot.loc[ano_vab_agro_mun] / vab_agro_pivot.loc[ano_vab_agro_mun, "Ceará"]) * 100
@@ -1213,7 +1197,7 @@ plt.show()
 
 # Como mudou o peso da agropecuária no VAB do Brasil e do Ceará?
 
-# In[66]:
+# In[67]:
 
 
 pct_agro_bc = df_pib_sem_codigo[
@@ -1240,7 +1224,7 @@ plt.show()
 
 # ## Participação da Agropecuária no VAB — Municípios
 
-# In[67]:
+# In[68]:
 
 
 pct_agro_municipios_pivot = df_municipios_pct.copy()
@@ -1264,7 +1248,7 @@ for municipio, pct in top10_menos_dependentes.items():
 
 # Quais municípios são mais dependentes da agropecuária?
 
-# In[68]:
+# In[69]:
 
 
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -1278,3 +1262,37 @@ ax.spines[["top", "right"]].set_visible(False)
 
 plt.show()
 
+
+# ## Correlação entre Métricas (Municípios do Ceará)
+
+# In[70]:
+
+
+metricas_municipios_ceara = df_municipios.pivot_table(
+    index=['ano_nome', 'territorio_nome'], columns='variavel_nome', values='valor'
+)
+
+nomes_curtos = {
+    'Produto Interno Bruto a preços correntes': 'PIB',
+    'Valor adicionado bruto a preços correntes total': 'VAB Total',
+    'Valor adicionado bruto a preços correntes da agropecuária': 'VAB Agro',
+    'Participação do valor adicionado bruto a preços correntes da agropecuária no valor adicionado bruto a preços correntes total': '% Agro no VAB',
+}
+
+correlacao_metricas_pib = metricas_municipios_ceara.corr().rename(index=nomes_curtos, columns=nomes_curtos)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+sb.heatmap(correlacao_metricas_pib, annot=True, fmt='.2f', cmap='coolwarm', vmin=-1, vmax=1, ax=ax)
+ax.set_title('Correlação entre métricas do PIB (municípios do Ceará, por ano)')
+plt.tight_layout()
+plt.show()
+
+
+# **Leitura da correlação:**
+# 
+# - **PIB × VAB Total (1.00):** correlação perfeita — PIB municipal é basicamente o VAB total mais impostos, então andam juntos por construção.
+# - **VAB Agro × PIB/VAB Total (0.10–0.11):** correlação fraca — o tamanho da economia agropecuária em Mil Reais não acompanha o tamanho geral da economia do município (municípios pequenos podem ter agropecuária relevante, municípios grandes podem ser pouco agrícolas).
+# - **% Agro no VAB × PIB/VAB Total (-0.18):** fraca negativa — municípios com economia maior tendem a depender um pouco menos, proporcionalmente, da agropecuária (mais diversificados/urbanos).
+# - **% Agro no VAB × VAB Agro (0.21):** fraca positiva — mais valor agropecuário em termos absolutos tende a vir acompanhado de uma participação um pouco maior no VAB total, mas a relação não é forte.
+# 
+# Importante: VAB total, VAB agropecuário e % agropecuária não têm dado para 2022 e 2023 (372 valores nulos = 186 territórios × 2 anos) — o PIB é divulgado mais rápido que o VAB pelo IBGE, então essa correlação usa só os anos com os quatro indicadores disponíveis.
