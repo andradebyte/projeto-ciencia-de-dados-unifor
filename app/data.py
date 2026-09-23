@@ -51,30 +51,30 @@ def load_ppm() -> pd.DataFrame:
     return df
 
 
-def kpi_por_especie(ppm: pd.DataFrame) -> pd.DataFrame:
-    """Efetivo do Ceará em ANO_FIM e variação % desde ANO_INICIO, uma linha por espécie.
+def municipios_lista(ppm: pd.DataFrame) -> pd.DataFrame:
+    """Municípios (N6) com código IBGE de 7 dígitos e nome sem o sufixo " - CE"."""
+    m = ppm.loc[
+        ppm["nivel_territorial_codigo"] == "N6", ["territorio_codigo", "territorio_nome"]
+    ].drop_duplicates()
+    m = m.rename(columns={"territorio_codigo": "codigo_ibge", "territorio_nome": "municipio"})
+    m["municipio"] = m["municipio"].str.removesuffix(" - CE")
+    return m.sort_values("municipio").reset_index(drop=True)
 
-    Cada espécie é calculada em série independente; os valores nunca são
-    somados entre espécies (efetivo de rebanhos distintos não é equivalente).
+
+def serie_por_especie(
+    ppm: pd.DataFrame, nivel: str, codigo: str, ano_ini: int, ano_fim: int
+) -> pd.DataFrame:
+    """Efetivo anual de um território (linhas = ano, colunas = espécie).
+
+    Cada coluna é uma série independente: espécies nunca são somadas.
     """
-    ce = ppm[
-        (ppm["nivel_territorial_codigo"] == "N3")
-        & (ppm["territorio_codigo"] == CEARA_TERRITORIO_CODIGO)
+    sub = ppm[
+        (ppm["nivel_territorial_codigo"] == nivel)
+        & (ppm["territorio_codigo"] == codigo)
+        & ppm["ano_codigo"].between(ano_ini, ano_fim)
     ]
-    linhas = []
-    for especie in ESPECIES:
-        serie = ce.loc[ce["especie"] == especie].set_index("ano_codigo")["valor"].sort_index()
-        efetivo_fim = serie.loc[ANO_FIM]
-        efetivo_inicio = serie.loc[ANO_INICIO]
-        variacao_pct = (efetivo_fim / efetivo_inicio - 1) * 100
-        linhas.append(
-            {
-                "especie": especie,
-                "efetivo_atual_cab": int(efetivo_fim),
-                "variacao_pct": round(float(variacao_pct), 1),
-            }
-        )
-    return pd.DataFrame(linhas)
+    piv = sub.pivot_table(index="ano_codigo", columns="especie", values="valor")
+    return piv.reindex(columns=ESPECIES).sort_index()
 
 
 def n_municipios(ppm: pd.DataFrame) -> int:
@@ -89,7 +89,23 @@ def load_malha() -> dict:
     de junção é a propriedade `codarea` (código IBGE de 7 dígitos).
     """
     with open(MALHA_FILE, encoding="utf-8") as f:
-        return json.load(f)
+        malha = json.load(f)
+    for feat in malha["features"]:
+        _orientar_aneis_horario(feat["geometry"]["coordinates"])
+    return malha
+
+
+def _orientar_aneis_horario(aneis: list) -> None:
+    """Anel externo horário e furos anti-horários, como o Plotly (d3-geo) exige.
+
+    A malha do IBGE vem com anéis anti-horários, o que faz cada município
+    preencher o mapa inteiro. Correção só em memória: o arquivo raw não muda.
+    """
+    for i, anel in enumerate(aneis):
+        area2 = sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(anel, anel[1:] + anel[:1]))
+        horario = area2 < 0
+        if horario != (i == 0):
+            anel.reverse()
 
 
 def validar_codarea(malha: dict, ppm: pd.DataFrame) -> dict:
@@ -109,28 +125,35 @@ def validar_codarea(malha: dict, ppm: pd.DataFrame) -> dict:
     }
 
 
-def ppm_por_municipio(ppm: pd.DataFrame, especie: str, ano: int) -> pd.DataFrame:
-    """Efetivo por município (N6) de uma espécie em um ano, ranqueado.
+def ppm_por_municipio(ppm: pd.DataFrame, especie: str, ano_ini: int, ano_fim: int) -> pd.DataFrame:
+    """Efetivo médio no período e crescimento por município (N6), ranqueado.
 
     Uma única espécie por chamada: rebanhos de espécies distintas não são
     unidades equivalentes e nunca são somados (dados/README_DADOS.md item 5).
+    `cresc_pct` fica vazio quando o efetivo inicial é zero.
     """
-    sub = ppm.loc[
+    sub = ppm[
         (ppm["nivel_territorial_codigo"] == "N6")
         & (ppm["especie"] == especie)
-        & (ppm["ano_codigo"] == ano),
-        ["territorio_codigo", "territorio_nome", "valor"],
-    ].rename(
-        columns={
-            "territorio_codigo": "codigo_ibge",
-            "territorio_nome": "municipio",
-            "valor": "efetivo_cab",
-        }
+        & ppm["ano_codigo"].between(ano_ini, ano_fim)
+    ]
+    piv = sub.pivot_table(
+        index=["territorio_codigo", "territorio_nome"], columns="ano_codigo", values="valor"
     )
-    sub = sub.astype({"efetivo_cab": "int64"}).sort_values(
-        "efetivo_cab", ascending=False
-    ).reset_index(drop=True)
-    sub.insert(0, "ranking", range(1, len(sub) + 1))
-    total = sub["efetivo_cab"].sum()
-    sub["participacao_pct"] = (sub["efetivo_cab"] / total * 100).round(2) if total > 0 else 0.0
-    return sub
+    out = pd.DataFrame(
+        {
+            "efetivo_medio": piv.mean(axis=1).round(0).astype("int64"),
+            "efetivo_ini": piv[ano_ini],
+            "efetivo_fim": piv[ano_fim],
+        }
+    ).reset_index()
+    out = out.rename(columns={"territorio_codigo": "codigo_ibge", "territorio_nome": "municipio"})
+    out["municipio"] = out["municipio"].str.removesuffix(" - CE")
+    out["cresc_pct"] = ((out["efetivo_fim"] / out["efetivo_ini"] - 1) * 100).where(
+        (out["efetivo_ini"] > 0) & (ano_fim > ano_ini)
+    ).round(1)
+    out = out.sort_values("efetivo_medio", ascending=False).reset_index(drop=True)
+    out.insert(0, "ranking", range(1, len(out) + 1))
+    total = out["efetivo_medio"].sum()
+    out["participacao_pct"] = (out["efetivo_medio"] / total * 100).round(2) if total > 0 else 0.0
+    return out
