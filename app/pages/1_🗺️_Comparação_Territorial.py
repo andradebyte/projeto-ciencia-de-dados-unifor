@@ -29,6 +29,11 @@ st.set_page_config(
 )
 
 
+VERMELHO = "#E53935"
+PALETA_VERMELHOS = ["#FDE0DD", "#FBB4B9", "#EF6C6C", "#E53935", "#7F0000"]
+PLOT_LAYOUT = dict(template="plotly_white", font=dict(color="#111111"))
+
+
 @st.cache_data
 def _load_ppm() -> pd.DataFrame:
     return load_ppm()
@@ -123,7 +128,7 @@ fig_map = px.choropleth(
     featureidkey="properties.codarea",
     color="classe",
     category_orders={"classe": ordem_classes},
-    color_discrete_sequence=px.colors.sequential.YlOrBr[2 : 2 + N_CLASSES],
+    color_discrete_sequence=PALETA_VERMELHOS,
     custom_data=["municipio", "codigo_ibge", "efetivo_fmt", "ranking", "participacao_pct"],
 )
 fig_map.update_traces(
@@ -138,7 +143,7 @@ fig_map.update_traces(
     ),
 )
 fig_map.update_geos(fitbounds="locations", visible=False)
-fig_map.update_layout(
+fig_map.update_layout(**PLOT_LAYOUT, 
     margin=dict(l=0, r=0, t=10, b=0),
     legend_title_text="Efetivo (cab.) - classes por quantil",
 )
@@ -160,7 +165,7 @@ fig_rank = px.bar(
     labels={"efetivo_cab": f"Efetivo de {especie.lower()} (cab.)", "municipio": "Município"},
 )
 fig_rank.update_traces(
-    marker_color="#8c510a",
+    marker_color=VERMELHO,
     hovertemplate=(
         "<b>%{y}</b> (IBGE %{customdata[0]})<br>"
         "Ranking: %{customdata[1]}º de 184<br>"
@@ -169,7 +174,7 @@ fig_rank.update_traces(
         "<extra></extra>"
     ),
 )
-fig_rank.update_layout(margin=dict(l=0, r=0, t=10, b=0), height=max(320, top_n * 24))
+fig_rank.update_layout(**PLOT_LAYOUT, margin=dict(l=0, r=0, t=10, b=0), height=max(320, top_n * 24))
 st.plotly_chart(fig_rank)
 
 with st.expander(f"Tabela completa - {len(df)} municípios, ordenada por efetivo"):
@@ -200,17 +205,17 @@ fig_dist = px.histogram(
     nbins=30,
     labels={"efetivo_cab": f"Efetivo de {especie.lower()} (cab.)"},
 )
-fig_dist.update_traces(marker_color="#5ab4ac")
+fig_dist.update_traces(marker_color=VERMELHO)
 if escala_log:
     fig_dist.update_xaxes(type="log")
 mediana = df["efetivo_cab"].median()
 fig_dist.add_vline(
     x=mediana,
     line_dash="dash",
-    line_color="grey",
+    line_color="#111111",
     annotation_text=f"Mediana: {mediana:,.0f} cab.".replace(",", "."),
 )
-fig_dist.update_layout(margin=dict(l=0, r=0, t=10, b=0), yaxis_title="Nº de municípios")
+fig_dist.update_layout(**PLOT_LAYOUT, margin=dict(l=0, r=0, t=10, b=0), yaxis_title="Nº de municípios")
 st.plotly_chart(fig_dist)
 
 resumo = df["efetivo_cab"].describe(percentiles=[0.25, 0.5, 0.75, 0.9])
