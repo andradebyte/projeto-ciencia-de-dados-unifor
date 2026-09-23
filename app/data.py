@@ -1,6 +1,6 @@
 """Carregamento e indicadores da PPM (efetivo dos rebanhos, tabela SIDRA 3939).
 
-Regra obrigatoria (data/README_DADOS.md item 4-5): bovinos, caprinos, ovinos,
+Regra obrigatoria (dados/README_DADOS.md item 4-5): bovinos, caprinos, ovinos,
 suinos e galinaceos NAO sao unidades equivalentes e NUNCA devem ser somados
 entre si. Cada especie e tratada em serie propria, do carregamento aos KPIs.
 """
@@ -10,14 +10,9 @@ from pathlib import Path
 
 import pandas as pd
 
-RAW_DIR = Path(__file__).resolve().parent.parent / "data" / "dados_originais"
+RAW_DIR = Path(__file__).resolve().parent.parent / "dados" / "raw"
 PPM_FILE = RAW_DIR / "t3939_ppm_efetivo_rebanhos_2003_2024_ce_br.csv"
-MALHA_FILE = (
-    Path(__file__).resolve().parent.parent
-    / "data"
-    / "dados_comuns"
-    / "malha_municipal_ce_2022.geojson"
-)
+MALHA_FILE = RAW_DIR / "malha_municipal_ce_2022.geojson"
 
 SIDRA_NA = {"...": pd.NA, "..": pd.NA, "X": pd.NA}
 SIDRA_ZERO = {"-": 0.0}
@@ -89,7 +84,7 @@ def n_municipios(ppm: pd.DataFrame) -> int:
 def load_malha() -> dict:
     """Malha municipal do Ceará (GeoJSON, IBGE, 2022).
 
-    Dado geográfico auxiliar (data/dados_comuns/README_DADOS_COMUNS.md): não
+    Dado geográfico auxiliar (dados/raw/README_DADOS_COMUNS.md): não
     conta como uma das três tabelas SIDRA exigidas para integração. A chave
     de junção é a propriedade `codarea` (código IBGE de 7 dígitos).
     """
@@ -118,7 +113,7 @@ def ppm_por_municipio(ppm: pd.DataFrame, especie: str, ano: int) -> pd.DataFrame
     """Efetivo por município (N6) de uma espécie em um ano, ranqueado.
 
     Uma única espécie por chamada: rebanhos de espécies distintas não são
-    unidades equivalentes e nunca são somados (data/README_DADOS.md item 5).
+    unidades equivalentes e nunca são somados (dados/README_DADOS.md item 5).
     """
     sub = ppm.loc[
         (ppm["nivel_territorial_codigo"] == "N6")

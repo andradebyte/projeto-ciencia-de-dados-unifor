@@ -224,7 +224,7 @@ st.caption(
 st.divider()
 st.caption(
     "Fonte: IBGE/SIDRA, tabela 3939 (PPM). Malha municipal: IBGE, API de Malhas "
-    "Geográficas v3, Ceará 2022 (data/dados_comuns/malha_municipal_ce_2022.geojson) - "
+    "Geográficas v3, Ceará 2022 (dados/raw/malha_municipal_ce_2022.geojson) - "
     "dado geográfico auxiliar, não contabilizado entre as tabelas SIDRA integradas. "
     "Comparação limitada ao efetivo absoluto (cabeças); não normalizada por área ou "
     "população municipal, que estão fora do recorte de dados desta missão pessoal "
