@@ -30,7 +30,7 @@ O relatório está organizado para separar a análise de cada base e, só depois
 Todas as bases são recortes oficiais do SIDRA/IBGE e abrangem **Brasil**, **Ceará** e os **184 municípios cearenses**. A proveniência de cada arquivo (URL da API, filtros, hash) está em [`dados/fontes.csv`](dados/fontes.csv); as regras de interpretação estão em [`dados/README_DADOS.md`](dados/README_DADOS.md).
 
 | Tabela SIDRA | Base | Conteúdo | Período | Linhas | Colunas |
-|---|---|---|---|---|---:|---:|
+|---|---|---|---|---:|---:|
 | 5457 | PAM | 7 culturas × 5 variáveis | 2003–2024 | 143.220 | 13 |
 | 3939 | PPM | Efetivo de 5 rebanhos | 2003–2024 | 20.460 | 13 |
 | 5938 | PIB dos Municípios | PIB, VAB total, VAB agropecuário e participação | 2003–2023 (VAB até 2021) | 15.624 | 11 |
@@ -238,7 +238,7 @@ Os **galináceos** dominam o efetivo analisado, com cerca de **83%** das cabeça
 ![Rebanho dominante em cada município do Ceará, 2024](docs/imagens/ppm_mapa_rebanho_dominante.png)
 
 | Espécie | 1º lugar | Cabeças | 2º lugar | Cabeças |
-|---|---|---|---:|---|---:|
+|---|---|---:|---|---:|
 | Bovino | Morada Nova | 104.079 | Quixeramobim | 94.758 |
 | Caprino | Tauá | 90.651 | Independência | 58.182 |
 | Ovino | Tauá | 212.758 | Independência | 131.686 |
