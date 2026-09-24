@@ -21,7 +21,7 @@ O projeto cobre o ciclo completo de um trabalho de dados: coleta a partir da API
 
 ### Dados
 
-Os arquivos brutos são recortes oficiais do SIDRA/IBGE (tabelas 5457, 3939 e 5938), abrangendo Brasil, Ceará e os 184 municípios cearenses. Detalhes sobre variáveis, seleções, chaves e cuidados obrigatórios de interpretação estão documentados em [`dados/README_DADOS.md`](dados/README_DADOS.md); a proveniência de cada arquivo (URL da API, filtros, hash) está em [`dados/fontes.csv`](dados/fontes.csv).
+Os arquivos brutos são recortes oficiais do SIDRA/IBGE (tabelas 5457, 3939 e 5938), abrangendo Brasil, Ceará e os 184 municípios cearenses. Detalhes sobre variáveis, seleções, chaves e cuidados obrigatórios de interpretação estão documentados em [`data/README_DADOS.md`](data/README_DADOS.md); a proveniência de cada arquivo (URL da API, filtros, hash) está em [`data/fontes.csv`](data/fontes.csv).
 
 ### Pipeline de preparação de dados
 
@@ -35,13 +35,13 @@ O pipeline em `src/` lê os dados brutos, remove duplicatas, trata símbolos de 
 
 As decisões de tratamento e a validação dos resultados estão detalhadas em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md).
 
-Para rodar o pipeline e gerar as bases tratadas a partir dos dados brutos, execute na raiz do projeto:
+Para rodar a pipeline end-to-end (limpeza e cruzamento analítico) a partir dos dados brutos, execute na raiz do projeto:
 
 ```bash
 python src/pipeline.py
 ```
 
-Os dados tratados são salvos em `dados/processed/` em formato `.csv`.
+Os dados tratados são salvos em `data/processed/` e a base cruzada final em `data/analytical/` no formato `.csv`.
 
 ### Notebooks e análises
 

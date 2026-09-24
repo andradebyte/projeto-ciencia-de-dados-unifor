@@ -51,7 +51,7 @@ with col_tabelas:
             "área plantada é positiva.\n"
             "- **Malha municipal:** GeoJSON do IBGE (Ceará, 2022, `codarea`), dado geográfico "
             "auxiliar que não conta como tabela SIDRA. Os anéis dos polígonos são reorientados "
-            "em memória para o Plotly; o arquivo em `dados/raw/` não é alterado.\n"
+            "em memória para o Plotly; o arquivo em `data/raw/` não é alterado.\n"
             "- **Comparação territorial em valores absolutos**, sem normalização por área ou população.\n"
             "- Todos os dados são arquivos estáticos do repositório: o painel não consulta o SIDRA."
         )

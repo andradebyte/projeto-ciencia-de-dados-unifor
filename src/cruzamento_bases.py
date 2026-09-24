@@ -25,9 +25,9 @@ pd.set_option('display.width', 1000)
 # In[2]:
 
 
-df_pam = pd.read_csv('../dados/processed/pam_tratado.csv')
-df_ppm = pd.read_csv('../dados/processed/ppm_tratado.csv')
-df_pib = pd.read_csv('../dados/processed/pib_tratado.csv')
+df_pam = pd.read_csv('../data/processed/pam_tratado.csv')
+df_ppm = pd.read_csv('../data/processed/ppm_tratado.csv')
+df_pib = pd.read_csv('../data/processed/pib_tratado.csv')
 
 pam_mun = df_pam[df_pam['nivel_territorial_nome'] == 'Município'].copy()
 ppm_mun = df_ppm[df_ppm['nivel_territorial_nome'] == 'Município'].copy()
@@ -39,19 +39,19 @@ for nome, df in [('PAM', pam_mun), ('PPM', ppm_mun), ('PIB', pib_mun)]:
 
 # ## Cópias limpas (sem colunas `*_codigo`)
 # 
-# As colunas `*_codigo` (exceto `territorio_codigo`, que é a chave de pareamento) já cumpriram seu papel na etapa de tratamento — daqui pra frente só usamos os nomes. Salva uma cópia "limpa" de cada base em `dados/analytical/`, sem essas colunas, para consulta e uso nos demais notebooks/dashboard.
+# As colunas `*_codigo` (exceto `territorio_codigo`, que é a chave de pareamento) já cumpriram seu papel na etapa de tratamento — daqui pra frente só usamos os nomes. Salva uma cópia "limpa" de cada base em `data/analytical/`, sem essas colunas, para consulta e uso nos demais notebooks/dashboard.
 
 # In[3]:
 
 
 import os
 
-os.makedirs('../dados/analytical', exist_ok=True)
+os.makedirs('../data/analytical', exist_ok=True)
 
 for nome, df in [('pam', df_pam), ('ppm', df_ppm), ('pib', df_pib)]:
     colunas_codigo = [c for c in df.columns if c.endswith('_codigo') and c != 'territorio_codigo']
     df_limpo = df.drop(columns=colunas_codigo)
-    caminho = f'../dados/analytical/{nome}_limpo.csv'
+    caminho = f'../data/analytical/{nome}_limpo.csv'
     df_limpo.to_csv(caminho, index=False)
     print(f"Salvo: {caminho} ({len(df_limpo)} linhas, {len(df_limpo.columns)} colunas; removidas: {colunas_codigo})")
 
@@ -207,14 +207,14 @@ ausencia = (cruzamento[colunas_valor].isna().mean() * 100).sort_values(ascending
 print(ausencia.round(1))
 
 
-# ## Salvando o cruzamento em `dados/analytical/`
+# ## Salvando o cruzamento em `data/analytical/`
 
 # In[11]:
 
 
 import os
 
-os.makedirs('../dados/analytical', exist_ok=True)
-cruzamento.to_csv('../dados/analytical/cruzamento_pam_ppm_pib.csv', index=False)
-print(f"Salvo: dados/analytical/cruzamento_pam_ppm_pib.csv ({len(cruzamento)} linhas, {len(cruzamento.columns)} colunas)")
+os.makedirs('../data/analytical', exist_ok=True)
+cruzamento.to_csv('../data/analytical/cruzamento_pam_ppm_pib.csv', index=False)
+print(f"Salvo: data/analytical/cruzamento_pam_ppm_pib.csv ({len(cruzamento)} linhas, {len(cruzamento.columns)} colunas)")
 

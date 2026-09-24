@@ -81,6 +81,21 @@ def run_pipeline():
     print(f"Salvando {pib_out}...")
     df_pib.to_csv(pib_out, index=False)
     
+    print("\n--- 5. Cruzamento das Bases (Camada Analytical) ---")
+    script_path = base_dir / "src" / "cruzamento_bases.py"
+    if script_path.exists():
+        import subprocess
+        import sys
+        print("Executando cruzamento_bases.py...")
+        # Executa a partir da pasta src para respeitar os caminhos relativos do script original
+        resultado = subprocess.run([sys.executable, script_path.name], cwd=str(base_dir / "src"))
+        if resultado.returncode == 0:
+            print("\nCruzamento e geração da camada analytical concluídos!")
+        else:
+            print("\nErro ao tentar cruzar as bases.")
+    else:
+        print("\nScript cruzamento_bases.py não encontrado, pulando etapa de integração.")
+        
     print("\nPipeline executado com sucesso!")
 
 if __name__ == "__main__":

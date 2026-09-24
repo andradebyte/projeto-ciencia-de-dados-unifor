@@ -31,9 +31,9 @@ São Gonçalo do Amarante se destaca isoladamente: quase o dobro do segundo colo
 
 ### Base de dados usada
 
-O dataset original do projeto (`dados/processed/pib_tratado.csv`) só tem PIB total e VAB agropecuário — não permite isolar indústria/serviços. Para investigar a causa do crescimento, foi necessário buscar uma base adicional: **VAB setorial por município** (agropecuária, indústria, serviços, administração pública), obtida diretamente da API do IBGE (agregado SIDRA 5938, mesma tabela do projeto, variáveis setoriais 513/517/6575/525).
+O dataset original do projeto (`data/processed/pib_tratado.csv`) só tem PIB total e VAB agropecuário — não permite isolar indústria/serviços. Para investigar a causa do crescimento, foi necessário buscar uma base adicional: **VAB setorial por município** (agropecuária, indústria, serviços, administração pública), obtida diretamente da API do IBGE (agregado SIDRA 5938, mesma tabela do projeto, variáveis setoriais 513/517/6575/525).
 
-**Limitação de dados**: o IBGE ainda não divulgou o VAB setorial de 2022 e 2023 (mesmo gap já registrado em `dados/fontes.csv` para a base original). Por isso a análise setorial usa o último ano disponível: **2021**.
+**Limitação de dados**: o IBGE ainda não divulgou o VAB setorial de 2022 e 2023 (mesmo gap já registrado em `data/fontes.csv` para a base original). Por isso a análise setorial usa o último ano disponível: **2021**.
 
 ### Composição setorial de São Gonçalo do Amarante
 
