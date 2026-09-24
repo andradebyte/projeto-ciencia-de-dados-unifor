@@ -65,6 +65,24 @@ def quadro_municipal(pam: pd.DataFrame, ppm: pd.DataFrame, pib: pd.DataFrame, an
     return quadro.reset_index()
 
 
+def _spearman_pares(x: pd.Series, y: pd.Series) -> float:
+    """Spearman sem scipy: correlação de Pearson entre os postos.
+
+    `Series.rank(method="average")` trata empates com postos médios; a correlação
+    de Pearson entre postos (`.corr()`, que não depende de scipy) é o Spearman.
+    """
+    return x.rank(method="average").corr(y.rank(method="average"))
+
+
+def spearman_series(x: pd.Series, y: pd.Series) -> float | None:
+    """Spearman entre duas séries, com exclusão de pares ausentes e constantes."""
+    par = pd.DataFrame({"x": x, "y": y}).dropna()
+    if len(par) < 3 or par["x"].nunique() < 2 or par["y"].nunique() < 2:
+        return None
+    valor = _spearman_pares(par["x"], par["y"])
+    return round(float(valor), 3) if pd.notna(valor) else None
+
+
 def spearman(quadro: pd.DataFrame, coluna_a: str, coluna_b: str) -> tuple[float | None, int]:
     """Spearman com exclusão de pares ausentes. Devolve (rho, n)."""
     if coluna_a not in quadro.columns or coluna_b not in quadro.columns:
@@ -74,7 +92,7 @@ def spearman(quadro: pd.DataFrame, coluna_a: str, coluna_b: str) -> tuple[float 
         return None, len(par)
     if par[coluna_a].nunique() < 2 or par[coluna_b].nunique() < 2:
         return None, len(par)
-    return round(par[coluna_a].corr(par[coluna_b], method="spearman"), 3), len(par)
+    return spearman_series(par[coluna_a], par[coluna_b]), len(par)
 
 
 def crescimento_cultura(pam: pd.DataFrame, nivel: str, codigo: str, ini: int, fim: int) -> pd.DataFrame:
@@ -345,4 +363,4 @@ def variacoes_anuais_corr(pam: pd.DataFrame, pib: pd.DataFrame, ini: int, fim: i
         return {"pearson": None, "spearman": None, "n": len(mudancas)}
     x = pd.Series([m[0] for m in mudancas])
     y = pd.Series([m[1] for m in mudancas])
-    return {"pearson": round(float(x.corr(y)), 3), "spearman": round(float(x.corr(y, method="spearman")), 3), "n": len(mudancas)}
+    return {"pearson": round(float(x.corr(y)), 3), "spearman": round(float(_spearman_pares(x, y)), 3), "n": len(mudancas)}

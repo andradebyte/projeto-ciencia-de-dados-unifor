@@ -6,6 +6,7 @@ na malha, `territorio_codigo` na PPM). A métrica é o efetivo médio no períod
 escolhido nos filtros globais, de uma espécie por vez.
 """
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -137,13 +138,36 @@ with col_esq:
         else:
             st.markdown(f"**Distribuição do efetivo médio de {especie.lower()} entre os municípios**")
             log = st.checkbox("Escala logarítmica (recomendada: distribuição assimétrica)", value=True)
-            fig = px.histogram(
-                df, x="efetivo_medio", nbins=30,
-                labels={"efetivo_medio": f"Efetivo médio de {especie.lower()} (cab.)"},
-            )
-            fig.update_traces(marker_color=VERMELHO)
-            if log:
+            valores = df["efetivo_medio"]
+            if log and (valores > 0).any():
+                validos = valores[valores > 0]
+                edges = np.logspace(np.log10(validos.min()), np.log10(validos.max()), 31)
+                contagens, _ = np.histogram(validos, bins=edges)
+                centros = np.sqrt(edges[:-1] * edges[1:])
+                larguras = np.diff(edges)
+                fig = go.Figure(
+                    go.Bar(
+                        x=centros,
+                        y=contagens,
+                        width=larguras,
+                        marker_color=VERMELHO,
+                        customdata=[
+                            (edges[i], edges[i + 1], int(contagens[i]))
+                            for i in range(len(contagens))
+                        ],
+                        hovertemplate=(
+                            "%{customdata[0]:,.0f} a %{customdata[1]:,.0f} cab."
+                            "<br>%{customdata[2]} municípios<extra></extra>"
+                        ),
+                    )
+                )
                 fig.update_xaxes(type="log")
+            else:
+                fig = px.histogram(
+                    df, x="efetivo_medio", nbins=30,
+                    labels={"efetivo_medio": f"Efetivo médio de {especie.lower()} (cab.)"},
+                )
+                fig.update_traces(marker_color=VERMELHO)
             mediana = df["efetivo_medio"].median()
             fig.add_vline(
                 x=mediana, line_dash="dash", line_color=PRETO,
