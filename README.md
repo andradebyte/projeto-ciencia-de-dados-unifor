@@ -1,7 +1,7 @@
 # Projeto de Ciência de Dados — Agropecuária do Ceará (IBGE)
 
 **Links Rápidos:**
-- 🌍 [Acessar Dashboard Publicado](URL_DO_STREAMLIT_AQUI)
+- 🌍 [Acessar Dashboard Publicado](https://projeto-ciencia-de-dados-unifor-j6ed4u7qczb4abxdceh56x.streamlit.app/)
 - 🎥 [Assistir ao Vídeo no YouTube](URL_DO_YOUTUBE_AQUI)
 
 Análise exploratória e dashboard sobre a agropecuária dos 184 municípios do Ceará, com base em dados oficiais do IBGE (SIDRA): Produção Agrícola Municipal (PAM), Pesquisa da Pecuária Municipal (PPM) e PIB dos Municípios, no recorte 2003–2024.
