@@ -15,7 +15,7 @@ from matplotlib.colors import LogNorm
 # In[2]:
 
 
-gdf_municipios = gpd.read_file("../data/raw/malha_municipal_ce_2022.geojson")
+gdf_municipios = gpd.read_file("../dados/raw/malha_municipal_ce_2022.geojson")
 
 print(f"Total de municípios: {gdf_municipios.shape[0]}")
 print(f"Geometrias inválidas antes: {(~gdf_municipios.geometry.is_valid).sum()}")
@@ -33,7 +33,7 @@ plt.show()
 # In[3]:
 
 
-df_ppm_raw = pd.read_csv("../data/processed/ppm_tratado.csv")
+df_ppm_raw = pd.read_csv("../dados/processed/ppm_tratado.csv")
 
 
 # **Regra importante (não somar espécies):** assim como no notebook principal do PPM, cada espécie (bovino, caprino, ovino, suíno, galináceos) é medida em "Cabeças" mas não são unidades equivalentes entre si. Cada mapa abaixo é de uma única espécie — nenhuma soma entre espécies é feita.

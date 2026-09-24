@@ -1,9 +1,9 @@
 """Carregamento e indicadores das bases SIDRA do painel: PPM (3939), PAM (5457) e PIB (5938).
 
-O painel lê a camada `data/processed` (tabelas já tipadas e higienizadas pelo
-pipeline em src/) e a malha municipal em `data/raw`. Nunca consulta o SIDRA.
+O painel lê a camada `dados/processed` (tabelas já tipadas e higienizadas pelo
+pipeline em src/) e a malha municipal em `dados/raw`. Nunca consulta o SIDRA.
 
-Regra obrigatória (data/README_DADOS.md item 4-5): bovinos, caprinos, ovinos,
+Regra obrigatória (dados/README_DADOS.md item 4-5): bovinos, caprinos, ovinos,
 suínos e galináceos NÃO são unidades equivalentes e NUNCA são somados entre si.
 Cada espécie é tratada em série própria, do carregamento aos indicadores.
 """
@@ -199,7 +199,7 @@ def cruzamento_municipal(
 def load_malha() -> dict:
     """Malha municipal do Ceará (GeoJSON, IBGE, 2022).
 
-    Dado geográfico auxiliar (data/raw/README_DADOS_COMUNS.md): não
+    Dado geográfico auxiliar (dados/raw/README_DADOS_COMUNS.md): não
     conta como uma das três tabelas SIDRA exigidas para integração. A chave
     de junção é a propriedade `codarea` (código IBGE de 7 dígitos).
     """
@@ -244,7 +244,7 @@ def ppm_por_municipio(ppm: pd.DataFrame, especie: str, ano_ini: int, ano_fim: in
     """Efetivo médio no período e crescimento por município (N6), ranqueado.
 
     Uma única espécie por chamada: rebanhos de espécies distintas não são
-    unidades equivalentes e nunca são somados (data/README_DADOS.md item 5).
+    unidades equivalentes e nunca são somados (dados/README_DADOS.md item 5).
     `cresc_pct` fica vazio quando o efetivo inicial é zero.
     """
     sub = ppm[

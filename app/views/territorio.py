@@ -233,6 +233,6 @@ with st.expander("Tabela completa dos 184 municípios"):
 
 st.caption(
     "Fonte: IBGE/SIDRA, tabela 3939 (PPM). Malha: IBGE, API de Malhas v3, Ceará 2022 "
-    "(data/raw/malha_municipal_ce_2022.geojson), dado auxiliar fora das três tabelas SIDRA. "
+    "(dados/raw/malha_municipal_ce_2022.geojson), dado auxiliar fora das três tabelas SIDRA. "
     "Comparação em efetivo absoluto, sem normalização por área ou população."
 )

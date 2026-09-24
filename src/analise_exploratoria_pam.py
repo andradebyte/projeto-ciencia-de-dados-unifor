@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 1000)
 
-df = pd.read_csv('../data/processed/pam_tratado.csv')
+df = pd.read_csv('../dados/processed/pam_tratado.csv')
 df.head()
 
 

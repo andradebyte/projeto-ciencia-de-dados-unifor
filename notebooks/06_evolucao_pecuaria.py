@@ -1,7 +1,7 @@
 """
 Evolucao pecuaria por especie (PPM 3939, efetivo dos rebanhos, 2003-2024).
 
-Regra obrigatoria (data/README_DADOS.md item 4-5; feedback do acompanhamento):
+Regra obrigatoria (dados/README_DADOS.md item 4-5; feedback do acompanhamento):
 bovinos, caprinos, ovinos, suinos e galinaceos NAO sao unidades equivalentes e
 NUNCA devem ser somados entre si. Nao existe "rebanho total" - cada especie e
 tratada em serie propria, do carregamento ate os graficos.
@@ -20,7 +20,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-RAW = "data/raw"
+RAW = "dados/raw"
 SIDRA_NA = {"...": pd.NA, "..": pd.NA, "X": pd.NA}
 SIDRA_ZERO = {"-": 0.0}
 

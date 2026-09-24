@@ -17,7 +17,7 @@ from matplotlib.colors import LogNorm
 # In[ ]:
 
 
-gdf_municipios = gpd.read_file("../data/raw/malha_municipal_ce_2022.geojson")
+gdf_municipios = gpd.read_file("../dados/raw/malha_municipal_ce_2022.geojson")
 
 print(f"Total de municípios: {gdf_municipios.shape[0]}")
 print(f"Geometrias inválidas antes: {(~gdf_municipios.geometry.is_valid).sum()}")
@@ -37,7 +37,7 @@ plt.show()
 # In[ ]:
 
 
-df_pib_raw = pd.read_csv("../data/processed/pib_tratado.csv")
+df_pib_raw = pd.read_csv("../dados/processed/pib_tratado.csv")
 
 pib_municipios_geo = df_pib_raw[
     (df_pib_raw["nivel_territorial_nome"] == "Município")

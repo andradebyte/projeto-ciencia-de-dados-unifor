@@ -179,7 +179,7 @@ with col_atalhos:
 with st.expander("Recorte dos dados e instruções de uso"):
     st.markdown(
         "- **Fontes:** IBGE/SIDRA, tabelas 5457 (PAM), 3939 (PPM) e 5938 (PIB municipal), "
-        "arquivos estáticos fornecidos pelo professor e tratados em `data/processed`.\n"
+        "arquivos estáticos fornecidos pelo professor e tratados em `dados/processed`.\n"
         f"- **Território:** Ceará e {n_municipios(dados)} municípios (chave: código IBGE de 7 dígitos).\n"
         "- **Período:** 2003–2024 (PAM e PPM); PIB até 2023 e VAB agropecuário até 2021.\n"
         "- **Uso:** escolha município, período e produto na barra lateral; compare sempre "

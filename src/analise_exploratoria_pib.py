@@ -13,7 +13,7 @@ import matplotlib as plt
 # In[2]:
 
 
-df_pib = pd.read_csv("../data/processed/pib_tratado.csv")
+df_pib = pd.read_csv("../dados/processed/pib_tratado.csv")
 
 print(f"Total de linhas: {df_pib.shape[0]}")
 print(f"Total de colunas: {df_pib.shape[1]}")
