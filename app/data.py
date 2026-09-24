@@ -1,8 +1,11 @@
-"""Carregamento e indicadores da PPM (efetivo dos rebanhos, tabela SIDRA 3939).
+"""Carregamento e indicadores das bases SIDRA do painel: PPM (3939), PAM (5457) e PIB (5938).
 
-Regra obrigatoria (dados/README_DADOS.md item 4-5): bovinos, caprinos, ovinos,
-suinos e galinaceos NAO sao unidades equivalentes e NUNCA devem ser somados
-entre si. Cada especie e tratada em serie propria, do carregamento aos KPIs.
+O painel lê a camada `dados/processed` (tabelas já tipadas e higienizadas pelo
+pipeline em src/) e a malha municipal em `dados/raw`. Nunca consulta o SIDRA.
+
+Regra obrigatória (dados/README_DADOS.md item 4-5): bovinos, caprinos, ovinos,
+suínos e galináceos NÃO são unidades equivalentes e NUNCA são somados entre si.
+Cada espécie é tratada em série própria, do carregamento aos indicadores.
 """
 
 import json
@@ -10,12 +13,13 @@ from pathlib import Path
 
 import pandas as pd
 
-RAW_DIR = Path(__file__).resolve().parent.parent / "dados" / "raw"
-PPM_FILE = RAW_DIR / "t3939_ppm_efetivo_rebanhos_2003_2024_ce_br.csv"
+ROOT = Path(__file__).resolve().parent.parent
+RAW_DIR = ROOT / "dados" / "raw"
+PROCESSED_DIR = ROOT / "dados" / "processed"
+PPM_FILE = PROCESSED_DIR / "ppm_tratado.csv"
+PAM_FILE = PROCESSED_DIR / "pam_tratado.csv"
+PIB_FILE = PROCESSED_DIR / "pib_tratado.csv"
 MALHA_FILE = RAW_DIR / "malha_municipal_ce_2022.geojson"
-
-SIDRA_NA = {"...": pd.NA, "..": pd.NA, "X": pd.NA}
-SIDRA_ZERO = {"-": 0.0}
 
 REBANHO_COD_NOME = {
     "2670": "Bovinos",
@@ -26,28 +30,64 @@ REBANHO_COD_NOME = {
 }
 ESPECIES = list(REBANHO_COD_NOME.values())
 
+PRODUTOS = [
+    "Milho (em grão)",
+    "Feijão (em grão)",
+    "Mandioca",
+    "Cana-de-açúcar",
+    "Banana (cacho)",
+    "Castanha de caju",
+    "Melão",
+]
+PAM_VARIAVEIS = {
+    "8331": "area_plantada",
+    "216": "area_colhida",
+    "214": "quantidade",
+    "112": "rendimento",
+    "215": "valor_producao",
+}
+PIB_VARIAVEIS = {
+    "37": "pib",
+    "498": "vab_total",
+    "513": "vab_agro",
+    "516": "pct_vab_agro",
+}
+
 ANO_INICIO = 2003
 ANO_FIM = 2024
+ANO_PIB_FIM = 2023
+ANO_VAB_FIM = 2021
 CEARA_TERRITORIO_CODIGO = "23"
 
 
-def _read_sidra(path: Path, extra_dtypes: dict | None = None) -> pd.DataFrame:
+def _read_processed(path: Path, extra_dtypes: dict | None = None) -> pd.DataFrame:
     dtypes = {
         "territorio_codigo": "string",
-        "ano_codigo": "Int64",
         "nivel_territorial_codigo": "string",
+        "variavel_codigo": "string",
     }
     if extra_dtypes:
         dtypes.update(extra_dtypes)
-    df = pd.read_csv(path, sep=";", encoding="utf-8-sig", dtype=dtypes, keep_default_na=False)
-    df["valor"] = df["valor"].replace(SIDRA_NA).replace(SIDRA_ZERO)
-    df["valor"] = pd.to_numeric(df["valor"], errors="raise")
+    df = pd.read_csv(path, dtype=dtypes)
+    df["ano_codigo"] = df["ano_codigo"].astype("int64")
     return df
 
 
 def load_ppm() -> pd.DataFrame:
-    df = _read_sidra(PPM_FILE, {"tipo_rebanho_codigo": "string"})
+    df = _read_processed(PPM_FILE, {"tipo_rebanho_codigo": "string"})
     df["especie"] = df["tipo_rebanho_codigo"].map(REBANHO_COD_NOME)
+    return df
+
+
+def load_pam() -> pd.DataFrame:
+    df = _read_processed(PAM_FILE, {"produto_codigo": "string"})
+    df["variavel"] = df["variavel_codigo"].map(PAM_VARIAVEIS)
+    return df
+
+
+def load_pib() -> pd.DataFrame:
+    df = _read_processed(PIB_FILE)
+    df["variavel"] = df["variavel_codigo"].map(PIB_VARIAVEIS)
     return df
 
 
@@ -79,6 +119,81 @@ def serie_por_especie(
 
 def n_municipios(ppm: pd.DataFrame) -> int:
     return ppm.loc[ppm["nivel_territorial_codigo"] == "N6", "territorio_codigo"].nunique()
+
+
+def _serie_territorio(df, nivel, codigo, ano_ini, ano_fim, filtro_extra=None):
+    mask = (
+        (df["nivel_territorial_codigo"] == nivel)
+        & (df["territorio_codigo"] == codigo)
+        & df["ano_codigo"].between(ano_ini, ano_fim)
+    )
+    if filtro_extra is not None:
+        mask &= filtro_extra
+    return df[mask]
+
+
+def pam_serie(
+    pam: pd.DataFrame, nivel: str, codigo: str, produto: str, ano_ini: int, ano_fim: int
+) -> pd.DataFrame:
+    """Série anual da PAM de um produto e território (linhas = ano).
+
+    `frustracao` = 1 - área colhida / área plantada, só onde a área plantada é
+    positiva (denominador nulo ou zero deixa o valor vazio, sem imputação).
+    """
+    sub = _serie_territorio(pam, nivel, codigo, ano_ini, ano_fim, pam["produto_nome"] == produto)
+    piv = sub.pivot_table(index="ano_codigo", columns="variavel", values="valor")
+    piv = piv.reindex(columns=list(PAM_VARIAVEIS.values())).sort_index()
+    piv["frustracao"] = (1 - piv["area_colhida"] / piv["area_plantada"]).where(
+        piv["area_plantada"] > 0
+    )
+    return piv
+
+
+def pib_serie(
+    pib: pd.DataFrame, nivel: str, codigo: str, ano_ini: int, ano_fim: int
+) -> pd.DataFrame:
+    """PIB, VAB total, VAB agropecuário e participação (%) de um território, por ano.
+
+    VAB e participação só existem até 2021; depois disso vêm vazios (`...`).
+    """
+    sub = _serie_territorio(pib, nivel, codigo, ano_ini, ano_fim)
+    piv = sub.pivot_table(index="ano_codigo", columns="variavel", values="valor", dropna=False)
+    return piv.reindex(columns=list(PIB_VARIAVEIS.values())).sort_index()
+
+
+def cruzamento_municipal(
+    ppm: pd.DataFrame, pam: pd.DataFrame, pib: pd.DataFrame, produto: str, ano: int
+) -> tuple[pd.DataFrame, dict]:
+    """Junção PAM x PPM x PIB por código IBGE de 7 dígitos, um município por linha.
+
+    Chave: `codigo_ibge` (string). Cardinalidade esperada 1:1 em cada base para
+    um produto e um ano; `validate="one_to_one"` falha se houver duplicatas.
+    Retorna a tabela combinada e o diagnóstico de correspondências.
+    """
+    def _base(df, filtro, coluna):
+        sub = df[(df["nivel_territorial_codigo"] == "N6") & (df["ano_codigo"] == ano) & filtro]
+        return sub[["territorio_codigo", "territorio_nome", "valor"]].rename(
+            columns={"territorio_codigo": "codigo_ibge", "territorio_nome": "municipio", "valor": coluna}
+        )
+
+    q = _base(pam, (pam["produto_nome"] == produto) & (pam["variavel"] == "quantidade"), "quantidade_t")
+    b = _base(ppm, ppm["especie"] == "Bovinos", "efetivo_bovinos")
+    v = _base(pib, pib["variavel"] == "pct_vab_agro", "pct_vab_agro")
+
+    m = q.merge(b.drop(columns="municipio"), on="codigo_ibge", how="outer", validate="one_to_one")
+    m = m.merge(v.drop(columns="municipio"), on="codigo_ibge", how="outer", validate="one_to_one")
+    m["municipio"] = m["municipio"].str.removesuffix(" - CE")
+    codigos = [set(x["codigo_ibge"]) for x in (q, b, v)]
+    diag = {
+        "n_pam": len(codigos[0]),
+        "n_ppm": len(codigos[1]),
+        "n_pib": len(codigos[2]),
+        "n_comum": len(codigos[0] & codigos[1] & codigos[2]),
+        "n_uniao": len(m),
+        "sem_vab": int(m["pct_vab_agro"].isna().sum()),
+        "sem_producao": int((m["quantidade_t"].fillna(0) <= 0).sum()),
+    }
+    return m, diag
 
 
 def load_malha() -> dict:

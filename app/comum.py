@@ -1,9 +1,21 @@
 """Elementos compartilhados entre as telas: cache dos dados, filtros globais e estilo."""
 
+from typing import NamedTuple
+
 import pandas as pd
 import streamlit as st
 
-from data import ANO_FIM, ANO_INICIO, ESPECIES, load_malha, load_ppm, municipios_lista
+from data import (
+    ANO_FIM,
+    ANO_INICIO,
+    ESPECIES,
+    PRODUTOS,
+    load_malha,
+    load_pam,
+    load_pib,
+    load_ppm,
+    municipios_lista,
+)
 
 VERMELHO = "#E53935"
 VERMELHO_ESCURO = "#7F0000"
@@ -24,6 +36,16 @@ def ppm() -> pd.DataFrame:
 
 
 @st.cache_data
+def pam() -> pd.DataFrame:
+    return load_pam()
+
+
+@st.cache_data
+def pib() -> pd.DataFrame:
+    return load_pib()
+
+
+@st.cache_data
 def malha() -> dict:
     return load_malha()
 
@@ -33,11 +55,22 @@ def municipios() -> pd.DataFrame:
     return municipios_lista(ppm())
 
 
-def filtros_globais() -> tuple[str, int, int]:
-    """Município, ano inicial e ano final escolhidos na barra lateral."""
-    municipio = st.session_state.get("filtro_municipio", ESTADO)
+class Filtros(NamedTuple):
+    municipio: str
+    ini: int
+    fim: int
+    produto: str
+
+
+def filtros_globais() -> Filtros:
+    """Município, período e produto PAM escolhidos na barra lateral."""
     ini, fim = st.session_state.get("filtro_anos", (ANO_INICIO, ANO_FIM))
-    return municipio, ini, fim
+    return Filtros(
+        st.session_state.get("filtro_municipio", ESTADO),
+        ini,
+        fim,
+        st.session_state.get("filtro_produto", PRODUTOS[0]),
+    )
 
 
 def territorio_do_filtro(municipio: str) -> tuple[str, str]:
@@ -59,3 +92,8 @@ def seletor_especie(key: str) -> str:
 
 def fmt_int(valor: float) -> str:
     return f"{valor:,.0f}".replace(",", ".")
+
+
+def fmt_dec(valor: float, casas: int = 2) -> str:
+    """Número com vírgula decimal (padrão brasileiro)."""
+    return f"{valor:,.{casas}f}".replace(",", "#").replace(".", ",").replace("#", ".")

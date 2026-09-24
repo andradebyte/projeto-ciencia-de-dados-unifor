@@ -18,7 +18,7 @@ from data import ESPECIES, serie_por_especie
 
 TRACOS = {"Bovinos": "solid", "Caprinos": "dash", "Ovinos": "dot", "Suínos": "dashdot", "Galináceos": "longdash"}
 
-municipio, ini, fim = filtros_globais()
+municipio, ini, fim, _ = filtros_globais()
 nivel, codigo = territorio_do_filtro(municipio)
 serie = serie_por_especie(ppm(), nivel, codigo, ini, fim)
 

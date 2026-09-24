@@ -27,7 +27,7 @@ from data import ppm_por_municipio, validar_codarea
 
 N_CLASSES = 5
 
-municipio, ini, fim = filtros_globais()
+municipio, ini, fim, _ = filtros_globais()
 mapa_geo = malha()
 
 st.title("Comparação territorial — 184 municípios")
