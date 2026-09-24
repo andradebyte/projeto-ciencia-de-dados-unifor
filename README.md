@@ -8,7 +8,7 @@ O projeto cobre o ciclo completo de um trabalho de dados: coleta a partir da API
 
 ```
 .
-├── app/            # Dashboard interativo (Streamlit)
+├── app/            # Dashboard (Streamlit): telas em views/
 ├── dados/          # Dados brutos, tratados e analíticos
 │   ├── raw/            # Dados originais baixados do SIDRA/IBGE
 │   ├── processed/      # Dados tratados pelo pipeline (saída de src/pipeline.py)
@@ -49,10 +49,12 @@ Em `notebooks/` estão as análises exploratórias (incluindo recortes geoespaci
 
 ### Dashboard
 
-O dashboard interativo, em `app/main.py`, permite explorar a base tratada da PAM por território, variável e produto. Para executar:
+O dashboard interativo fica em `app/` e é um app **Streamlit** com sete telas: Visão geral, Agricultura (PAM), Pecuária (PPM), Economia municipal (PIB), Território, Cruzamentos e Fontes/metodologia. As telas ficam em `app/views/` e compartilham os dados carregados por `app/data.py`.
+
+Para executar:
 
 ```bash
-streamlit run app/main.py
+streamlit run app/app.py
 ```
 
 ## Requisitos
