@@ -17,12 +17,20 @@ from comum import (
     territorio_do_filtro,
 )
 from data import (
+    ANO_PIB_FIM,
     ANO_VAB_FIM,
     ESPECIES,
     n_municipios,
     pam_serie,
     pib_serie,
     serie_por_especie,
+)
+from insights import (
+    crescimento_especie,
+    desconcentracao_fortaleza,
+    lider_por_hectare,
+    pib_estado,
+    sga_caso,
 )
 
 dados = ppm()
@@ -121,6 +129,34 @@ for coluna, especie in zip(st.columns(len(ESPECIES)), ESPECIES):
     )
 
 # ---------------------------------------------------------------------------
+# Síntese de achados (calculada)
+# ---------------------------------------------------------------------------
+with st.container(border=True):
+    st.markdown("**O que os dados mostram**")
+    achados = []
+    est = pib_estado(pib(), 2003, ANO_PIB_FIM)
+    if est:
+        achados.append(f"A economia do Ceará cresceu **{est['fator']}×** no PIB nominal (2003→{ANO_PIB_FIM}).")
+    desc = desconcentracao_fortaleza(pib(), 2003, ANO_PIB_FIM)
+    if desc and desc["fim"] < desc["ini"]:
+        achados.append(f"Fortaleza perdeu participação relativa no PIB estadual: **{desc['ini']}% → {desc['fim']}%**.")
+    calc = sga_caso(pib(), 2003, ANO_PIB_FIM, ANO_VAB_FIM)
+    if calc and calc["fator"] and calc["pct_fim"] is not None and calc["pct_ini"] is not None and calc["pct_fim"] < calc["pct_ini"]:
+        achados.append(
+            f"São Gonçalo do Amarante cresceu **{calc['fator']}×** enquanto sua participação agropecuária caiu "
+            f"de {calc['pct_ini']}% para {calc['pct_fim']}%."
+        )
+    lider = lider_por_hectare(pam(), 2024)
+    if lider:
+        achados.append(f"Em 2024, **{lider['produto']}** teve o maior valor bruto por hectare colhido no estado.")
+    cresc_esp = crescimento_especie(ppm(), "N3", "23", 2003, 2024)
+    if not cresc_esp.empty:
+        achados.append(f"Na pecuária, **{cresc_esp.iloc[0]['especie']}** teve o maior crescimento relativo ({cresc_esp.iloc[0]['fator']:.2f}×).")
+    for linha in achados:
+        st.markdown(f"- {linha}")
+    st.page_link("views/sinteses.py", label="Ver todas as sínteses", icon=":material/lightbulb:")
+
+# ---------------------------------------------------------------------------
 # Resumo (PAM) + atalhos
 # ---------------------------------------------------------------------------
 col_resumo, col_atalhos = st.columns([3, 2])
@@ -163,6 +199,14 @@ with col_resumo:
             st.caption(f"{municipio} não registra produção de {produto.lower()} no período.")
 
 with col_atalhos:
+    with st.container(border=True):
+        st.markdown("**Ver agricultura (PAM) →**")
+        st.caption("Sete culturas, área plantada × colhida e valor bruto por hectare")
+        st.page_link("views/agricultura.py", label="Abrir tela Agricultura", icon=":material/agriculture:")
+    with st.container(border=True):
+        st.markdown("**Ver economia municipal (PIB) →**")
+        st.caption("PIB, VAB agropecuário, participação e maiores economias")
+        st.page_link("views/economia.py", label="Abrir tela Economia", icon=":material/trending_up:")
     with st.container(border=True):
         st.markdown("**Ver evolução da pecuária →**")
         st.caption("5 espécies, índice base = primeiro ano do intervalo, séries independentes")

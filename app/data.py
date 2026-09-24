@@ -240,6 +240,88 @@ def validar_codarea(malha: dict, ppm: pd.DataFrame) -> dict:
     }
 
 
+def producao_por_hectare(pam: pd.DataFrame) -> pd.DataFrame:
+    """Valor bruto da produção por hectare colhido, no agregado estadual do Ceará.
+
+    `valor_por_ha_rs = valor da produção (mil reais) * 1000 / área colhida (ha)`.
+    Área colhida ausente ou não positiva deixa o resultado vazio (nunca infinito).
+    Recorte fixo: Ceará (N3, código 23), sem somar municípios manualmente.
+    """
+    estado = pam[
+        (pam["nivel_territorial_codigo"] == "N3")
+        & (pam["territorio_codigo"] == CEARA_TERRITORIO_CODIGO)
+        & pam["ano_codigo"].between(ANO_INICIO, ANO_FIM)
+    ]
+    chaves = ["ano_codigo", "produto_nome"]
+    area = estado.loc[estado["variavel"] == "area_colhida", chaves + ["valor"]].rename(
+        columns={"valor": "area_colhida_ha"}
+    )
+    valor = estado.loc[estado["variavel"] == "valor_producao", chaves + ["valor"]].rename(
+        columns={"valor": "valor_producao_mil_reais"}
+    )
+    base = area.merge(valor, on=chaves, how="outer", validate="one_to_one")
+    base["valor_producao_rs"] = base["valor_producao_mil_reais"] * 1000
+    base["valor_por_ha_rs"] = base["valor_producao_rs"] / base["area_colhida_ha"].where(
+        base["area_colhida_ha"] > 0
+    )
+    return base.sort_values(chaves).reset_index(drop=True)
+
+
+def pam_matriz(
+    pam: pd.DataFrame, nivel: str, codigo: str, variavel: str, ano_ini: int, ano_fim: int
+) -> pd.DataFrame:
+    """Tabela ano × produto de uma variável da PAM (produtos em colunas próprias).
+
+    Cada produto permanece em sua própria série: quantidades, áreas e rendimentos
+    de culturas diferentes não são somados.
+    """
+    sub = pam[
+        (pam["nivel_territorial_codigo"] == nivel)
+        & (pam["territorio_codigo"] == codigo)
+        & (pam["variavel"] == variavel)
+        & pam["ano_codigo"].between(ano_ini, ano_fim)
+    ]
+    return sub.pivot_table(index="ano_codigo", columns="produto_nome", values="valor").sort_index()
+
+
+def cultura_dominante(pam: pd.DataFrame, ano: int) -> pd.DataFrame:
+    """Cultura de maior valor da produção em cada município (N6) no ano dado.
+
+    Usa `valor_producao`. Municípios sem valor positivo ficam com cultura vazia e
+    são reportados à parte na interface.
+    """
+    sub = pam[
+        (pam["nivel_territorial_codigo"] == "N6")
+        & (pam["variavel"] == "valor_producao")
+        & (pam["ano_codigo"] == ano)
+    ]
+    piv = sub.pivot_table(
+        index=["territorio_codigo", "territorio_nome"], columns="produto_nome", values="valor"
+    )
+    total = piv.sum(axis=1, min_count=1)
+    dominante = piv.idxmax(axis=1).where(total > 0)
+    out = pd.DataFrame(
+        {"cultura_dominante": dominante, "valor_dominante": piv.max(axis=1), "valor_total": total}
+    ).reset_index()
+    out["participacao_pct"] = (out["valor_dominante"] / out["valor_total"] * 100).round(1)
+    out = out.rename(columns={"territorio_codigo": "codigo_ibge", "territorio_nome": "municipio"})
+    out["municipio"] = out["municipio"].str.removesuffix(" - CE")
+    return out
+
+
+def pib_por_municipio(pib: pd.DataFrame, variavel: str, ano: int) -> pd.DataFrame:
+    """Valor de uma variável do PIB por município (N6) em um ano, com nome limpo."""
+    sub = pib[
+        (pib["nivel_territorial_codigo"] == "N6")
+        & (pib["variavel"] == variavel)
+        & (pib["ano_codigo"] == ano)
+    ][["territorio_codigo", "territorio_nome", "valor"]].rename(
+        columns={"territorio_codigo": "codigo_ibge", "territorio_nome": "municipio", "valor": variavel}
+    )
+    sub["municipio"] = sub["municipio"].str.removesuffix(" - CE")
+    return sub.reset_index(drop=True)
+
+
 def ppm_por_municipio(ppm: pd.DataFrame, especie: str, ano_ini: int, ano_fim: int) -> pd.DataFrame:
     """Efetivo médio no período e crescimento por município (N6), ranqueado.
 

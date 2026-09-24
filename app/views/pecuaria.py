@@ -15,6 +15,7 @@ from comum import (
     territorio_do_filtro,
 )
 from data import ESPECIES, serie_por_especie
+from insights import crescimento_especie, municipios_lideres_especie
 
 TRACOS = {"Bovinos": "solid", "Caprinos": "dash", "Ovinos": "dot", "Suínos": "dashdot", "Galináceos": "longdash"}
 
@@ -60,6 +61,23 @@ with st.container(border=True):
     fig_idx.update_layout(**PLOT_LAYOUT, height=340, yaxis_title=f"Índice ({ini} = 100)", xaxis_title="Ano")
     st.plotly_chart(fig_idx)
     st.caption("As espécies NÃO são somadas — cada uma é uma série independente.")
+
+with st.container(border=True):
+    st.markdown("**O que os dados mostram na pecuária**")
+    cresc_esp = crescimento_especie(ppm(), "N3", "23", 2003, min(fim, 2024))
+    if not cresc_esp.empty:
+        maior = cresc_esp.iloc[0]
+        menor = cresc_esp.iloc[-1]
+        st.markdown(
+            f"- No Ceará, o efetivo de **{maior['especie']}** foi o que mais cresceu "
+            f"({maior['fator']:.2f}×) e **{menor['especie']}** o que menos cresceu ({menor['fator']:.2f}×), "
+            f"entre 2003 e {min(fim, 2024)}."
+        )
+    lideres = municipios_lideres_especie(ppm(), min(fim, 2024))
+    if not lideres.empty:
+        detalhe = "; ".join(f"{r.especie}: {r.territorio_nome}" for r in lideres.itertuples())
+        st.markdown(f"- Maiores rebanhos em {min(fim, 2024)} — {detalhe}. Há especialização territorial.")
+    st.markdown("- Efetivo é estoque de animais (cabeças), não faturamento nem valor econômico.")
 
 col_log, col_leitura = st.columns([2, 1])
 

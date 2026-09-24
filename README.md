@@ -1,5 +1,9 @@
 # Projeto de Ciência de Dados — Agropecuária do Ceará (IBGE)
 
+**Links Rápidos:**
+- 🌍 [Acessar Dashboard Publicado](URL_DO_STREAMLIT_AQUI)
+- 🎥 [Assistir ao Vídeo no YouTube](URL_DO_YOUTUBE_AQUI)
+
 Análise exploratória e dashboard sobre a agropecuária dos 184 municípios do Ceará, com base em dados oficiais do IBGE (SIDRA): Produção Agrícola Municipal (PAM), Pesquisa da Pecuária Municipal (PPM) e PIB dos Municípios, no recorte 2003–2024.
 
 O projeto cobre o ciclo completo de um trabalho de dados: coleta a partir da API do IBGE, diagnóstico e tratamento de qualidade, análise exploratória (incluindo geoespacial), cruzamento das três bases e um dashboard interativo para consulta dos resultados.
@@ -8,7 +12,7 @@ O projeto cobre o ciclo completo de um trabalho de dados: coleta a partir da API
 
 ```
 .
-├── app/            # Dashboard interativo (Streamlit)
+├── app/            # Dashboard (Streamlit): telas em views/
 ├── dados/          # Dados brutos, tratados e analíticos
 │   ├── raw/            # Dados originais baixados do SIDRA/IBGE
 │   ├── processed/      # Dados tratados pelo pipeline (saída de src/pipeline.py)
@@ -35,13 +39,13 @@ O pipeline em `src/` lê os dados brutos, remove duplicatas, trata símbolos de 
 
 As decisões de tratamento e a validação dos resultados estão detalhadas em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md).
 
-Para rodar o pipeline e gerar as bases tratadas a partir dos dados brutos, execute na raiz do projeto:
+Para rodar a pipeline end-to-end (limpeza e cruzamento analítico) a partir dos dados brutos, execute na raiz do projeto:
 
 ```bash
 python src/pipeline.py
 ```
 
-Os dados tratados são salvos em `dados/processed/` em formato `.csv`.
+Os dados tratados são salvos em `dados/processed/` e a base cruzada final em `dados/analytical/` no formato `.csv`.
 
 ### Notebooks e análises
 
@@ -49,10 +53,12 @@ Em `notebooks/` estão as análises exploratórias (incluindo recortes geoespaci
 
 ### Dashboard
 
-O dashboard interativo, em `app/main.py`, permite explorar a base tratada da PAM por território, variável e produto. Para executar:
+O dashboard interativo fica em `app/` e é um app **Streamlit** com oito telas: Visão geral, Agricultura (PAM), Pecuária (PPM), Economia municipal (PIB), Território, Cruzamentos, Sínteses e Fontes/metodologia. As telas ficam em `app/views/` e compartilham os dados carregados por `app/data.py`.
+
+Para executar:
 
 ```bash
-streamlit run app/main.py
+streamlit run app/app.py
 ```
 
 ## Requisitos
