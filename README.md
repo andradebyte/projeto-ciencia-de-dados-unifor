@@ -1,5 +1,9 @@
 # Projeto de Ciência de Dados — Agropecuária do Ceará (IBGE)
 
+**Links Rápidos:**
+- 🌍 [Acessar Dashboard Publicado](URL_DO_STREAMLIT_AQUI)
+- 🎥 [Assistir ao Vídeo no YouTube](URL_DO_YOUTUBE_AQUI)
+
 Análise exploratória e dashboard sobre a agropecuária dos 184 municípios do Ceará, com base em dados oficiais do IBGE (SIDRA): Produção Agrícola Municipal (PAM), Pesquisa da Pecuária Municipal (PPM) e PIB dos Municípios, no recorte 2003–2024.
 
 O projeto cobre o ciclo completo de um trabalho de dados: coleta a partir da API do IBGE, diagnóstico e tratamento de qualidade, análise exploratória (incluindo geoespacial), cruzamento das três bases e um dashboard interativo para consulta dos resultados.
@@ -49,10 +53,10 @@ Em `notebooks/` estão as análises exploratórias (incluindo recortes geoespaci
 
 ### Dashboard
 
-O dashboard interativo, em `app/main.py`, permite explorar a base tratada da PAM por território, variável e produto. Para executar:
+O dashboard interativo, em `app/app.py`, consolida as análises exploratórias em múltiplas visões (Visão Geral, Pecuária, Território, Cruzamento e Fontes). Para executar localmente:
 
 ```bash
-streamlit run app/main.py
+streamlit run app/app.py
 ```
 
 ## Requisitos
