@@ -9,7 +9,7 @@ O projeto cobre o ciclo completo de um trabalho de dados: coleta a partir da API
 ```
 .
 ├── app/            # Dashboard interativo (Streamlit)
-├── dados/          # Dados brutos, tratados e analíticos
+├── data/          # Dados brutos, tratados e analíticos
 │   ├── raw/            # Dados originais baixados do SIDRA/IBGE
 │   ├── processed/      # Dados tratados pelo pipeline (saída de src/pipeline.py)
 │   └── analytical/     # Bases cruzadas (PAM x PPM x PIB)
