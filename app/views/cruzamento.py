@@ -25,7 +25,7 @@ from comum import (
     territorio_do_filtro,
 )
 from data import ANO_VAB_FIM, cruzamento_municipal, pam_serie, serie_por_especie
-from insights import correlacao_banana_vab_por_ano, quadro_municipal, spearman
+from insights import correlacao_banana_vab_por_ano, quadro_municipal, spearman, spearman_series
 
 municipio, ini, fim, produto = filtros_globais()
 nivel, codigo = territorio_do_filtro(municipio)
@@ -115,13 +115,13 @@ with col_disp:
                 fig.update_layout(**PLOT_LAYOUT, height=420, coloraxis_colorbar=dict(title="VAB agro (%)"))
                 st.plotly_chart(fig)
 
-                rho = pontos["quantidade_t"].corr(pontos["efetivo_bovinos"], method="spearman")
+                rho = spearman_series(pontos["quantidade_t"], pontos["efetivo_bovinos"])
                 st.caption(
                     f"{len(pontos)} de {diag['n_uniao']} municípios plotados; os demais não têm produção "
                     f"positiva de {produto.lower()} ({diag['sem_producao']}) ou VAB no ano "
                     f"({diag['sem_vab']}). Tamanho e tom do ponto = participação do VAB agropecuário (%). "
                     "Contorno preto = município filtrado. "
-                    f"Correlação de Spearman entre produção e efetivo bovino: ρ = {fmt_dec(rho)} "
+                    f"Correlação de Spearman entre produção e efetivo bovino: ρ = {fmt_dec(rho) if rho is not None else '—'} "
                     "(associação exploratória)."
                 )
 
