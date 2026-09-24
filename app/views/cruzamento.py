@@ -25,6 +25,7 @@ from comum import (
     territorio_do_filtro,
 )
 from data import ANO_VAB_FIM, cruzamento_municipal, pam_serie, serie_por_especie
+from insights import correlacao_banana_vab_por_ano, quadro_municipal, spearman
 
 municipio, ini, fim, produto = filtros_globais()
 nivel, codigo = territorio_do_filtro(municipio)
@@ -196,3 +197,47 @@ if ano_max >= ini:
             "usa apenas participações e quantidades físicas."
         )
         st.page_link("views/fontes.py", label="Ver metodologia completa →", icon=":material/menu_book:")
+
+# ---------------------------------------------------------------------------
+# Achados de correlação calculados (independem do ano do filtro)
+# ---------------------------------------------------------------------------
+with st.container(border=True):
+    st.markdown(f"**O que os dados mostram nos cruzamentos — {ANO_VAB_FIM}**")
+    quadro = quadro_municipal(pam(), ppm(), pib(), ANO_VAB_FIM)
+    rho_pam, n_pam = spearman(quadro, "valor_total", "vab_agro")
+    rho_pct, n_pct = spearman(quadro, "valor_total", "pct_vab_agro")
+    if rho_pam is not None:
+        st.markdown(
+            f"- Valor agrícola × VAB agropecuário: **ρ = {fmt_dec(rho_pam, 3)}** (n = {n_pam}) — "
+            "associação forte entre municípios."
+        )
+    if rho_pct is not None:
+        st.markdown(
+            f"- Valor agrícola × participação da agropecuária: **ρ = {fmt_dec(rho_pct, 3)}** (n = {n_pct}) — "
+            "produzir muito não é o mesmo que depender da agropecuária."
+        )
+    melhor = None
+    for cultura in ("milho", "feijao"):
+        for especie in ("bovino", "ovino", "caprino", "suino"):
+            valor, n = spearman(quadro, f"area_{cultura}", f"efetivo_{especie}")
+            if valor is not None and (melhor is None or valor > melhor[1]):
+                melhor = (f"{cultura} × {especie}", valor, n)
+    if melhor:
+        st.markdown(
+            f"- Padrão territorial: **{melhor[0]}** apresentam a maior associação área × rebanho "
+            f"(ρ = {fmt_dec(melhor[1], 3)}, n = {melhor[2]}) — agricultura familiar mista."
+        )
+    melao = [spearman(quadro, "area_melao", f"efetivo_{e}")[0] for e in ("bovino", "ovino", "caprino", "suino", "galinaceos")]
+    melao = [r for r in melao if r is not None]
+    if melao:
+        st.markdown(
+            f"- Relação fraca: o **melão** tem correlação próxima de zero com rebanhos "
+            f"(entre {min(melao):.2f} e {max(melao):.2f})."
+        )
+    banana = correlacao_banana_vab_por_ano(pam(), pib(), 2003, ANO_VAB_FIM).dropna(subset=["rho"])
+    if not banana.empty:
+        st.markdown(
+            f"- Valor da banana × VAB agropecuário, ano a ano: **{banana['rho'].min():.2f} a {banana['rho'].max():.2f}**, "
+            f"sem ano negativo ({len(banana)} anos)."
+        )
+    st.page_link("views/sinteses.py", label="Ver todas as sínteses", icon=":material/lightbulb:")
