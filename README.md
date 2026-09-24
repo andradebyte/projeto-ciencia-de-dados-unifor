@@ -125,9 +125,13 @@ Cada variável conta uma história diferente: **hectares** mostram uso da terra;
 | Cana-de-açúcar | R$ 123,0 mi | 4,1% |
 | Melão | R$ 109,7 mi | 3,6% |
 
+![Evolução do valor econômico da produção por cultura no Ceará, 2003–2024](docs/imagens/pam_valor_producao.png)
+
 ### Mais terra significa mais valor?
 
 **Não.** Em 2024, o milho ocupou **572.432 ha** plantados, produziu **398.661 t** e gerou **R$ 457,2 mi**. A banana ocupou **37.612 ha**, produziu **481.841 t** e gerou **R$ 905,3 mi**. Ou seja, a banana usou cerca de **15 vezes menos área** que o milho, mas produziu mais toneladas e gerou quase o **dobro** do valor bruto.
+
+![Comparação entre milho e banana em 2024 — área, quantidade e valor (Milho = 100)](docs/imagens/pam_milho_banana.png)
 
 ### Valor bruto da produção por hectare colhido
 
@@ -143,9 +147,17 @@ Métrica derivada: **valor da produção ÷ área colhida**. Não representa luc
 | Feijão | 346.245 ha | R$ 443,3 mi | R$ 1,28 mil/ha |
 | Milho | 572.172 ha | R$ 457,2 mi | R$ 799/ha |
 
+![Evolução do valor bruto da produção por hectare colhido no Ceará](docs/imagens/pam_valor_hectare.png)
+
+![Comparação relativa do valor bruto por hectare (Milho = 100)](docs/imagens/pam_valor_hectare_comparacao.png)
+
 Ter mais hectares não significa gerar mais valor: em 2024 o **melão** teve o maior valor bruto por hectare colhido.
 
 ### Área plantada × área efetivamente colhida (milho)
+
+![Área plantada por cultura no Ceará, 2003–2024](docs/imagens/pam_area_plantada.png)
+
+![Distribuição da área plantada das sete culturas em 2024](docs/imagens/pam_area_plantada_participacao.png)
 
 | Ano | Área plantada | Área colhida | Não convertida em colheita | Diferença relativa |
 |---|---:|---:|---:|---:|
@@ -153,11 +165,17 @@ Ter mais hectares não significa gerar mais valor: em 2024 o **melão** teve o m
 | 2009 | 714.034 ha | 691.632 ha | 22.402 ha | 3,14% |
 | 2012 | 535.959 ha | 497.598 ha | 38.361 ha | 7,16% |
 
+![Milho: área plantada versus área colhida no Ceará, 2003–2024](docs/imagens/pam_milho_area_plantada_colhida.png)
+
 **Cuidado:** a base mostra a diferença entre área plantada e colhida, mas **não informa a causa**. É mais correto falar em "área que não se converteu em colheita" do que assumir perda por um fator específico.
 
 ### Especialização territorial
 
 Para cada município foi identificada a **cultura de maior valor da produção** entre as sete. Em 2024, os municípios líderes por cultura foram:
+
+![Cultura dominante em cada município do Ceará, 2024](docs/imagens/pam_mapa_cultura_dominante.png)
+
+![Municípios líderes em valor da produção por cultura, 2024](docs/imagens/pam_municipios_lideres.png)
 
 | Produto | Município líder | Valor da produção |
 |---|---|---:|
@@ -209,17 +227,25 @@ A variável principal é o **efetivo dos rebanhos** (número de cabeças). Ela *
 | Suínos | 1,32 milhão |
 | Caprinos | 1,14 milhão |
 
+![Evolução do efetivo dos rebanhos no Ceará, 2003–2024](docs/imagens/ppm_efetivo_evolucao.png)
+
+![Participação de cada espécie no total de cabeças em 2024](docs/imagens/ppm_participacao_especies.png)
+
 Os **galináceos** dominam o efetivo analisado, com cerca de **83%** das cabeças em 2024. A diferença de escala é tão grande que as demais espécies ficam comprimidas em gráficos absolutos.
 
 ### Distribuição territorial
 
+![Rebanho dominante em cada município do Ceará, 2024](docs/imagens/ppm_mapa_rebanho_dominante.png)
+
 | Espécie | 1º lugar | Cabeças | 2º lugar | Cabeças |
-|---|---|---:|---|---:|
+|---|---|---|---:|---|---:|
 | Bovino | Morada Nova | 104.079 | Quixeramobim | 94.758 |
 | Caprino | Tauá | 90.651 | Independência | 58.182 |
 | Ovino | Tauá | 212.758 | Independência | 131.686 |
 | Suíno | Viçosa do Ceará | 51.000 | Granja | 49.465 |
 | Galináceos | Beberibe | 4.503.433 | Quixadá | 3.995.200 |
+
+![Municípios líderes por espécie em 2024](docs/imagens/ppm_municipios_lideres.png)
 
 ### Perguntas e insights da PPM
 
@@ -256,10 +282,18 @@ Os **galináceos** dominam o efetivo analisado, com cerca de **83%** das cabeça
 
 Entre 2003 e 2023, o PIB do Ceará passou de cerca de **R$ 32,7 bilhões** para **R$ 232,2 bilhões** — crescimento nominal de aproximadamente **7,1 vezes**. No mesmo período, o Brasil cresceu cerca de **6,37 vezes** (comparação indexada, 2003 = 100). Em valores absolutos, a linha do Ceará fica próxima da base, pois a economia brasileira é muito maior; por isso o gráfico indexado é o mais adequado para comparar ritmo.
 
+![Produto Interno Bruto do Ceará a preços correntes, 2003–2023](docs/imagens/pib_ceara.png)
+
+![Crescimento proporcional do PIB — Ceará × Brasil (base 2003 = 100)](docs/imagens/pib_ceara_brasil_indexado.png)
+
+![Valores nominais do PIB do Brasil e do Ceará, 2003–2023](docs/imagens/pib_brasil_ceara_absoluto.png)
+
 ### Concentração e crescimento municipal
 
 - **Maior PIB municipal:** Fortaleza, com cerca de **R$ 86,94 bilhões** em 2023 — muito acima dos demais.
 - **Top 10 em crescimento proporcional (2003–2023):**
+
+![Dez municípios com maior PIB em 2023](docs/imagens/pib_top10.png)
 
 | # | Município | Fator | Crescimento |
 |---|---|---|---:|
@@ -276,12 +310,22 @@ Entre 2003 e 2023, o PIB do Ceará passou de cerca de **R$ 32,7 bilhões** para 
 
 Fator = valor de 2023 ÷ valor de 2003; percentual = (fator − 1) × 100.
 
+![Top 10 municípios com maior crescimento proporcional do PIB, 2003–2023](docs/imagens/pib_top10_crescimento.png)
+
 ### Valor Adicionado Bruto e peso da agropecuária
+
+![Valor Adicionado Bruto total do Ceará, 2003–2021](docs/imagens/vab_total.png)
+
+![Valor Adicionado Bruto da agropecuária do Ceará, 2003–2021](docs/imagens/vab_agropecuaria.png)
 
 - O **VAB total** do Ceará passou de cerca de **R$ 28,6 bilhões** (2003) para **R$ 167,1 bilhões** (2021) — cerca de **5,84×** nominal.
 - Em 2021, o **VAB da agropecuária** atingiu cerca de **R$ 10,41 bilhões**, com série mais oscilante que o total.
 - Composição em 2021: **agropecuária 6,23%** e **demais atividades 93,77%**.
 - **Municípios com maior participação agropecuária em 2021:** São João do Jaguaribe (44,83%), Milhã (42,88%), Varjota (42,83%), Missão Velha (40,04%), Guaraciaba do Norte (40,00%), Independência (38,51%), Beberibe (36,49%), Quixelô (35,67%), Aratuba (35,14%) e Croatá (34,69%).
+
+![Composição do Valor Adicionado Bruto total do Ceará em 2021](docs/imagens/vab_composicao.png)
+
+![Municípios com maior participação da agropecuária no VAB total em 2021](docs/imagens/municipios_participacao_agro.png)
 
 ### São Gonçalo do Amarante
 
@@ -320,9 +364,15 @@ Correlação mostra **associação**, não prova que uma variável causa a outra
 
 Somando o valor das sete culturas por município, a correlação de Spearman com o VAB da agropecuária em 2021 foi de **≈ 0,75** — associação positiva forte. O padrão **não aparece só em 2021**: ao longo de 2003–2021 a relação permaneceu forte e, na soma estadual, as **variações anuais** das duas séries tiveram correlação de **≈ 0,97**.
 
+![Valor das sete culturas da PAM × VAB da agropecuária nos municípios, 2021](docs/imagens/cruzamento_pam_vab_scatter.png)
+
+![Evolução indexada do valor das culturas da PAM e do VAB da agropecuária, Ceará, 2003–2021](docs/imagens/cruzamento_pam_vab_evolucao.png)
+
 *Cuidado:* valor da produção da PAM e VAB são conceitos diferentes, e a PAM do projeto contém apenas sete culturas.
 
 ### 4.2 PPM × VAB da agropecuária (2021)
+
+![Correlação entre efetivos pecuários e VAB da agropecuária em 2021](docs/imagens/cruzamento_ppm_vab.png)
 
 | Rebanho | Spearman |
 |---|---:|
@@ -345,6 +395,8 @@ Há relação positiva, principalmente para galináceos, bovinos e suínos, mas 
 | Feijão × Bovinos | 0,49 |
 | Feijão × Suínos | 0,49 |
 
+![Relação entre área plantada (PAM) e rebanhos (PPM), 2021](docs/imagens/cruzamento_pam_ppm_heatmap.png)
+
 Milho e feijão aparecem com frequência nos mesmos municípios em que os rebanhos de bovinos, ovinos e caprinos são maiores — perfis territoriais semelhantes, **não causalidade**.
 
 ### 4.4 Relações que praticamente não apareceram
@@ -360,6 +412,8 @@ Em 2021, a correlação entre o valor das sete culturas e a **participação da 
 | São João do Jaguaribe | 44,83% | R$ 46,7 mi |
 | Beberibe | 36,49% | R$ 370,2 mi |
 | Fortaleza | 0,18% | R$ 107,1 mi |
+
+![Peso relativo × tamanho absoluto da agropecuária nos municípios, 2021](docs/imagens/cruzamento_absoluto_participacao.png)
 
 São João do Jaguaribe é proporcionalmente mais ligado à agropecuária; Beberibe, porém, gera muito mais riqueza agropecuária em valor absoluto. **Participação percentual e tamanho absoluto são dimensões diferentes.**
 
