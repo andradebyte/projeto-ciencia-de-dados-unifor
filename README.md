@@ -1,8 +1,9 @@
 # Projeto de Ciência de Dados — Agropecuária e transformação econômica do Ceará
 
 **Links Rápidos:**
-- 🌍 [Acessar Dashboard Publicado](https://projeto-ciencia-de-dados-unifor-j6ed4u7qczb4abxdceh56x.streamlit.app/)
-- 🎥 [Assistir ao Vídeo no YouTube](URL_DO_YOUTUBE_AQUI)
+- 🌍 [Dashboard publicado (Streamlit)](https://projeto-ciencia-de-dados-unifor-j6ed4u7qczb4abxdceh56x.streamlit.app/)
+- 💻 [Repositório GitHub](https://github.com/andradebyte/projeto-ciencia-de-dados-unifor)
+- 🎥 [Vídeo no YouTube](URL_DO_YOUTUBE_AQUI)
 
 Análise exploratória da agropecuária dos 184 municípios do Ceará e de sua relação com a estrutura econômica local, a partir de dados oficiais do IBGE/SIDRA: **Produção Agrícola Municipal (PAM)**, **Pesquisa da Pecuária Municipal (PPM)** e **Produto Interno Bruto dos Municípios (PIB)**. Período geral: **2003–2024** (PIB até 2023; Valor Adicionado Bruto até 2021).
 
@@ -41,6 +42,32 @@ Todas as bases são recortes oficiais do SIDRA/IBGE e abrangem **Brasil**, **Cea
 - **PIB — variáveis:** PIB a preços correntes (mil R$), VAB total (mil R$), VAB da agropecuária (mil R$), participação da agropecuária no VAB total (%).
 - **Malha municipal:** GeoJSON do IBGE (Ceará, 2022), dado geográfico auxiliar ligado pela chave `codarea` (código IBGE de 7 dígitos).
 
+### Dicionário de dados (colunas utilizadas)
+
+As bases tratadas compartilham o mesmo esquema de identificação e medida. Colunas de código são texto (preservam zeros à esquerda); `valor` é numérico e `valor_is_inibido` sinaliza sigilo.
+
+**Colunas comuns às três bases:**
+
+| Coluna | Papel |
+|---|---|
+| `nivel_territorial_codigo` / `nivel_territorial_nome` | Nível do território (Brasil, Unidade da Federação, Município) |
+| `territorio_codigo` / `territorio_nome` | Código IBGE e nome do território (a chave de pareamento é o código) |
+| `ano_codigo` / `ano_nome` | Ano da observação (2003–2024) |
+| `variavel_codigo` / `variavel_nome` | Variável medida |
+| `unidade` | Unidade de medida da variável |
+| `valor` | Valor numérico; ausências como vazio |
+| `valor_is_inibido` | 1 quando o valor original era `X` (sigilo); 0 nos demais casos |
+
+**Colunas específicas:**
+
+| Base | Coluna adicional | Conteúdo |
+|---|---|---|
+| PAM | `produto_codigo` / `produto_nome` | Cultura agrícola (7 produtos) |
+| PPM | `tipo_rebanho_codigo` / `tipo_rebanho_nome` | Espécie de rebanho (5 tipos) |
+| PIB | — | Sem classificação; a variável define PIB, VAB ou participação |
+
+**Unidades:** PAM — hectares, toneladas, kg/ha e mil R$; PPM — cabeças; PIB — mil R$ e %.
+
 ---
 
 ## Estrutura do repositório
@@ -77,6 +104,13 @@ O pipeline em `src/` lê os dados brutos, remove duplicatas pelas chaves oficiai
 - `src/cruzamento_bases.py`: cruza PAM, PPM e PIB pelo código do município.
 
 **Tratamento dos símbolos:** `-` e `0` viram zero observado; `..` e `...` viram vazio; `X` (sigilo) viraria vazio com a marca `valor_is_inibido`. A chave de integração é sempre o **código IBGE do município (7 dígitos)** — nunca o nome. O diagnóstico e as decisões estão em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md) e [`docs/relatorio_tratamento_dados.md`](docs/relatorio_tratamento_dados.md).
+
+### Regras de limpeza, agregação e integração
+
+- **Limpeza:** remoção de duplicatas pelas chaves oficiais (mantendo o último registro); tratamento dos símbolos especiais (acima); padronização de nomes de colunas e categorias; códigos territoriais lidos como texto.
+- **Agregação:** as bases permanecem em formato longo (uma linha por território-ano-variável-produto/espécie). Quantidades de culturas com unidades diferentes e efetivos de espécies distintas **não são somados** como equivalentes; rendimentos médios também não são somados. Somas só ocorrem em unidades homogêneas (por exemplo, valor monetário entre as sete culturas).
+- **Integração (junção reproduzível):** as três bases são integradas pela chave `territorio_codigo` + `ano_nome`, com cardinalidade esperada **1:1** por município-ano (validada com `validate="one_to_one"`). Os 184 municípios aparecem nas três bases; o cruzamento completo alcança **2021** (limite do VAB) e o cruzamento com o PIB, **2023**. O código é `src/cruzamento_bases.py` e o resultado, a base `dados/analytical/cruzamento_pam_ppm_pib.csv`, usada nas análises e no dashboard.
+- **Sem API em tempo de execução:** o dashboard lê apenas arquivos estáticos versionados no repositório; não há chamadas ao SIDRA em tempo de execução.
 
 ```bash
 python src/pipeline.py
@@ -504,6 +538,28 @@ streamlit run app/app.py
 ## Requisitos
 
 Principais dependências: `pandas`, `numpy` e `streamlit`.
+
+---
+
+## Entregáveis do Projeto 1
+
+Conferência com o documento de requisitos (Unidade I):
+
+| Entregável exigido | Onde está | Situação |
+|---|---|---|
+| Repositório GitHub público | `github.com/andradebyte/projeto-ciencia-de-dados-unifor` | pronto |
+| Dashboard publicado, sem autenticação | link em "Links Rápidos" | pronto |
+| Código executável do início ao fim (raw → processed → analytical) | `src/pipeline.py` e `src/cruzamento_bases.py` | pronto |
+| `requirements.txt` | raiz do repositório | pronto |
+| Inventário/dicionário de dados | seção "Dicionário de dados" deste README | pronto |
+| Registro de limpeza, agregação e integração | seção "Pipeline de preparação de dados" | pronto |
+| ≥ 4 insights (≥ 2 de cruzamento) | seções de análise e "Sínteses" do dashboard | pronto |
+| Slides do pitch (PDF) | `docs/slides.pdf` | pendente |
+| Acompanhamento | `docs/acompanhamento.pdf` | pronto |
+| Vídeo extensionista (YouTube) | "Links Rápidos" | pendente |
+| DreamShaper (100%) e submissão no AVA (`Projeto1_Equipe_<LETRA>.pdf`) | — | pendente |
+
+O dashboard lê arquivos estáticos versionados no repositório, é publicado sem autenticação e apresenta mensagens claras quando um filtro não retorna dados.
 
 ---
 
