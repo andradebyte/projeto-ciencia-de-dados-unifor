@@ -1,568 +1,309 @@
-# Projeto de Ciência de Dados — Agropecuária e transformação econômica do Ceará
+# Agropecuária e transformação econômica do Ceará
 
-**Links Rápidos:**
-- 🌍 [Dashboard publicado (Streamlit)](https://projeto-ciencia-de-dados-unifor-j6ed4u7qczb4abxdceh56x.streamlit.app/)
-- 💻 [Repositório GitHub](https://github.com/andradebyte/projeto-ciencia-de-dados-unifor)
-- 🎥 [Vídeo no YouTube](URL_DO_YOUTUBE_AQUI)
+**Projeto 1 de Ciência de Dados | Tema 2 | Grupo C | Universidade de Fortaleza (Unifor)**
 
-Análise exploratória da agropecuária dos 184 municípios do Ceará e de sua relação com a estrutura econômica local, a partir de dados oficiais do IBGE/SIDRA: **Produção Agrícola Municipal (PAM)**, **Pesquisa da Pecuária Municipal (PPM)** e **Produto Interno Bruto dos Municípios (PIB)**. Período geral: **2003–2024** (PIB até 2023; Valor Adicionado Bruto até 2021).
+Este projeto investiga como a produção agrícola e os efetivos pecuários dos municípios cearenses se transformaram entre 2003 e 2024 e como essas mudanças se relacionam com a estrutura econômica municipal. A análise utiliza dados oficiais do Instituto Brasileiro de Geografia e Estatística (IBGE), disponibilizados pelo Sistema IBGE de Recuperação Automática (SIDRA), e reúne preparação reproduzível dos dados, análise exploratória, integração de bases e um dashboard interativo.
 
----
+**Pergunta central:** Como o perfil agropecuário dos municípios cearenses se transformou entre 2003 e 2024 e como essas mudanças se relacionam com sua estrutura econômica?
 
-## Sobre o projeto
+O estudo considera os 184 municípios do Ceará. As séries físicas de agricultura e pecuária chegam a 2024, enquanto o PIB municipal está disponível até 2023 e as variáveis do Valor Adicionado Bruto (VAB), até 2021. Por isso, os cruzamentos respeitam os anos comuns às bases.
 
-O trabalho investiga como a produção agrícola e os efetivos pecuários dos municípios cearenses se transformaram entre 2003 e 2024 e como isso se relaciona com a estrutura econômica municipal nos períodos em que as bases têm dados em comum.
+## Acesse o projeto
 
-O relatório está organizado para separar a análise de cada base e, só depois, mostrar como agricultura, pecuária e economia se relacionam:
+| Recurso | Acesso |
+| :--- | :--- |
+| Dashboard | [Explorar no Streamlit](https://projeto-ciencia-de-dados-unifor-j6ed4u7qczb4abxdceh56x.streamlit.app/) |
+| Código e dados | [Repositório no GitHub](https://github.com/andradebyte/projeto-ciencia-de-dados-unifor) |
+| Relatório de acompanhamento | [`docs/acompanhamento.pdf`](docs/acompanhamento.pdf) |
+| Apresentação | [`docs/slides.pdf`](docs/slides.pdf)
+| Vídeo extensionista | [Assistir no YouTube](https://www.youtube.com/watch?v=dtfjXmxma14) |
 
-| Bloco | Objetivo |
-|---|---|
-| PAM | Entender área, produção, produtividade, valor econômico e especialização agrícola. |
-| PPM | Entender o tamanho, a evolução e a distribuição territorial dos rebanhos. |
-| Economia municipal | Entender Produto Interno Bruto, Valor Adicionado Bruto e peso da agropecuária. |
-| Cruzamentos | Ver o que se relaciona entre PAM, PPM e estrutura econômica e o que não apresenta relação clara. |
 
-**Nota metodológica:** valores monetários da PAM e do PIB/Valor Adicionado Bruto estão em **preços correntes (nominais)** e não foram corrigidos pela inflação. Correlação indica **associação, não causalidade**.
+## 1. Objetivos e organização da análise
 
----
+O objetivo é compreender as mudanças na agropecuária cearense e investigar como os perfis produtivos se relacionam com o tamanho e a composição das economias municipais. Os resultados permitem identificar diferenças territoriais que podem subsidiar novas investigações e discussões sobre planejamento regional. As associações observadas não estabelecem relações de causa e efeito.
 
-## Fontes e inventário dos dados
+O trabalho está organizado em quatro frentes complementares:
 
-Todas as bases são recortes oficiais do SIDRA/IBGE e abrangem **Brasil**, **Ceará** e os **184 municípios cearenses**. A proveniência de cada arquivo (URL da API, filtros, hash) está em [`dados/fontes.csv`](dados/fontes.csv); as regras de interpretação estão em [`dados/README_DADOS.md`](dados/README_DADOS.md).
+| Frente | Pergunta orientadora |
+| :--- | :--- |
+| Agricultura (PAM) | Como evoluíram a área, a produção, a produtividade e o valor das culturas selecionadas? |
+| Pecuária (PPM) | Como os rebanhos evoluíram e se distribuíram pelos municípios? |
+| Economia municipal (PIB e VAB) | Qual é o tamanho da economia municipal e qual é a participação da agropecuária? |
+| Cruzamentos | Quais relações aparecem entre agricultura, pecuária e estrutura econômica? |
 
-| Tabela SIDRA | Base | Conteúdo | Período | Linhas | Colunas |
-|---|---|---|---|---:|---:|
-| 5457 | PAM | 7 culturas × 5 variáveis | 2003–2024 | 143.220 | 13 |
-| 3939 | PPM | Efetivo de 5 rebanhos | 2003–2024 | 20.460 | 13 |
-| 5938 | PIB dos Municípios | PIB, VAB total, VAB agropecuário e participação | 2003–2023 (VAB até 2021) | 15.624 | 11 |
+## 2. Fontes, cobertura e dicionário de dados
 
-- **PAM — produtos:** milho, feijão, mandioca, cana-de-açúcar, banana, castanha de caju e melão.
-- **PAM — variáveis:** área plantada (ha), área colhida (ha), quantidade produzida (t), rendimento médio (kg/ha) e valor da produção (mil R$).
-- **PPM — espécies:** bovinos, caprinos, ovinos, suínos (total) e galináceos (total). Unidade: **cabeças**.
-- **PIB — variáveis:** PIB a preços correntes (mil R$), VAB total (mil R$), VAB da agropecuária (mil R$), participação da agropecuária no VAB total (%).
-- **Malha municipal:** GeoJSON do IBGE (Ceará, 2022), dado geográfico auxiliar ligado pela chave `codarea` (código IBGE de 7 dígitos).
+A pesquisa utiliza as três tabelas obrigatórias do Tema 2. O pacote também contém os recortes de Brasil e Ceará, utilizados quando pertinentes às comparações agregadas. Os arquivos originais e a malha municipal fornecidos para o projeto são preservados na camada `raw`, garantindo a rastreabilidade e a reprodutibilidade das análises.
 
-### Dicionário de dados (colunas utilizadas)
+| Tabela SIDRA | Base | Cobertura temporal | Recorte analítico | Unidade principal |
+| :--- | :--- | :--- | :--- | :--- |
+| 5457 | Produção Agrícola Municipal (PAM) | 2003 a 2024 | Sete culturas e cinco variáveis | ha, t, kg/ha e mil R$ |
+| 3939 | Pesquisa da Pecuária Municipal (PPM) | 2003 a 2024 | Cinco tipos de rebanho | cabeças |
+| 5938 | PIB dos Municípios | PIB: 2003 a 2023; VAB: até 2021 | PIB, VAB total, VAB agropecuário e participação | mil R$ e % |
 
-As bases tratadas compartilham o mesmo esquema de identificação e medida. Colunas de código são texto (preservam zeros à esquerda); `valor` é numérico e `valor_is_inibido` sinaliza sigilo.
+**PAM:** milho, feijão, mandioca, cana-de-açúcar, banana, castanha de caju e melão. As variáveis analisadas são área plantada ou destinada à colheita, área colhida, quantidade produzida, rendimento médio e valor da produção.
 
-**Colunas comuns às três bases:**
+**PPM:** bovinos, caprinos, ovinos, suínos e galináceos. Os efetivos representam o número de cabeças de cada espécie, não o valor econômico da criação.
 
-| Coluna | Papel |
-|---|---|
-| `nivel_territorial_codigo` / `nivel_territorial_nome` | Nível do território (Brasil, Unidade da Federação, Município) |
-| `territorio_codigo` / `territorio_nome` | Código IBGE e nome do território (a chave de pareamento é o código) |
-| `ano_codigo` / `ano_nome` | Ano da observação (2003–2024) |
-| `variavel_codigo` / `variavel_nome` | Variável medida |
-| `unidade` | Unidade de medida da variável |
-| `valor` | Valor numérico; ausências como vazio |
-| `valor_is_inibido` | 1 quando o valor original era `X` (sigilo); 0 nos demais casos |
+**PIB municipal:** PIB a preços correntes, VAB total, VAB agropecuário e participação da agropecuária no VAB total. O valor da produção agrícola da PAM não equivale ao VAB agropecuário nem ao lucro dos produtores.
 
-**Colunas específicas:**
+**Dados geográficos:** a malha municipal do Ceará de 2022 é utilizada nos mapas. Seu campo `codarea` contém o código IBGE de sete dígitos, empregado no pareamento territorial. A malha é um dado auxiliar e não substitui nenhuma das três tabelas SIDRA.
 
-| Base | Coluna adicional | Conteúdo |
-|---|---|---|
-| PAM | `produto_codigo` / `produto_nome` | Cultura agrícola (7 produtos) |
-| PPM | `tipo_rebanho_codigo` / `tipo_rebanho_nome` | Espécie de rebanho (5 tipos) |
-| PIB | — | Sem classificação; a variável define PIB, VAB ou participação |
+A proveniência dos arquivos, incluindo filtros e referências de obtenção, está documentada em [`dados/fontes.csv`](dados/fontes.csv). As particularidades dos dados originais e a interpretação dos símbolos são descritas em [`dados/README_DADOS.md`](dados/README_DADOS.md).
 
-**Unidades:** PAM — hectares, toneladas, kg/ha e mil R$; PPM — cabeças; PIB — mil R$ e %.
+### Campos padronizados
 
----
+| Campo | Função |
+| :--- | :--- |
+| `territorio_codigo` e `territorio_nome` | Código IBGE e nome do território. O pareamento usa exclusivamente o código. |
+| `nivel_territorial_codigo` e `nivel_territorial_nome` | Distinguem Brasil, unidade da Federação e município. |
+| `ano_codigo` e `ano_nome` | Identificam o ano da observação. |
+| `variavel_codigo` e `variavel_nome` | Identificam o indicador observado. |
+| `unidade` | Registra a unidade original da variável. |
+| `valor` | Armazena o valor numérico após a padronização, quando disponível. |
+| `valor_is_inibido` | Identifica valores originalmente marcados com `X` por sigilo. |
+| `produto_codigo` e `produto_nome` | Identificam a cultura agrícola na PAM. |
+| `tipo_rebanho_codigo` e `tipo_rebanho_nome` | Identificam a espécie na PPM. |
 
-## Estrutura do repositório
+Os códigos territoriais são tratados como texto para preservar a identificação original. As tabelas em `processed` mantêm os indicadores na granularidade apropriada de cada fonte. Agregações por município e ano são realizadas apenas quando necessárias para os cruzamentos.
 
-```
+## 3. Estrutura do repositório
+
+```text
 .
-├── app/            # Dashboard Streamlit
-│   ├── app.py          # Roteador (st.navigation) e filtros globais
-│   ├── data.py         # Camada de dados e indicadores
-│   ├── insights.py     # Achados calculados (correlações, rankings, líderes)
-│   ├── comum.py        # Cache, estilo e elementos compartilhados
-│   ├── test_data.py    # Testes do cálculo de valor bruto por hectare
-│   └── views/          # As oito telas do dashboard
+├── app/
+│   ├── app.py                 # Navegação e filtros do dashboard
+│   ├── data.py                # Carregamento e cálculo dos indicadores
+│   ├── insights.py            # Insights, correlações e rankings
+│   ├── comum.py               # Componentes e recursos compartilhados
+│   ├── test_data.py           # Testes do indicador de valor por hectare
+│   └── views/                 # Telas do dashboard
 ├── dados/
-│   ├── raw/            # Dados originais do SIDRA/IBGE + malha municipal
-│   ├── processed/      # Dados tratados (saída do pipeline)
-│   └── analytical/     # Base cruzada PAM x PPM x PIB
-├── docs/           # Relatórios e documentos das análises
-├── notebooks/      # Análises exploratórias (incluindo geoespaciais)
-├── src/            # Pipeline de preparação e scripts das análises
-└── requirements.txt
+│   ├── raw/                   # Arquivos originais, preservados sem alterações
+│   ├── processed/             # Arquivos limpos e padronizados
+│   ├── analytical/            # Tabelas integradas por município e ano
+│   ├── fontes.csv             # Proveniência dos arquivos
+│   └── README_DADOS.md        # Notas e interpretação dos dados
+├── docs/                      # Relatórios, apresentação e imagens
+├── notebooks/                 # Exploração e análises geoespaciais
+├── src/
+│   ├── data_loader.py                        # Leitura dos arquivos originais
+│   ├── data_cleaner.py                       # Verificação de duplicatas
+│   ├── data_standardizer.py                  # Tipagem e tratamento dos símbolos
+│   ├── pipeline.py                           # Orquestração da preparação
+│   ├── cruzamento_bases.py                   # Integração das bases
+│   ├── analise_exploratoria_pam.py           # Análise exploratória da PAM (seção 5)
+│   ├── analise_exploratoria_pam_geoespacial.py  # Mapas da PAM (cultura dominante)
+│   ├── analise_exploratoria_ppm.py           # Análise exploratória da PPM (seção 5)
+│   ├── analise_exploratoria_ppm_geoespacial.py  # Mapas da PPM (rebanho dominante)
+│   ├── analise_exploratoria_pib.py           # Análise exploratória do PIB e VAB (seção 5)
+│   └── analise_exploratoria_pib_geoespacial.py  # Mapas do PIB e da participação agropecuária
+├── requirements.txt
+└── README.md
 ```
 
----
+A organização separa os dados originais dos dados tratados e das tabelas analíticas. O relatório de preparação detalha as decisões metodológicas em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md).
 
-## Pipeline de preparação de dados
+## 4. Preparação e qualidade dos dados
 
-O pipeline em `src/` lê os dados brutos, remove duplicatas pelas chaves oficiais, trata os símbolos de ausência do IBGE e padroniza colunas e categorias:
+O fluxo de preparação lê as bases originais, verifica as chaves, identifica duplicatas, interpreta os símbolos especiais do SIDRA, padroniza os campos e produz os arquivos tratados. A integração é executada a partir das saídas do pipeline, sem modificar os arquivos da camada `raw`.
 
-- `src/data_loader.py`: leitura dos dados brutos (PAM, PPM, PIB) preservando códigos como texto.
-- `src/data_cleaner.py`: remoção de registros duplicados.
-- `src/data_standardizer.py`: tratamento de símbolos e padronização.
-- `src/pipeline.py`: orquestra leitura, limpeza e padronização, e salva os dados tratados.
-- `src/cruzamento_bases.py`: cruza PAM, PPM e PIB pelo código do município.
+### Símbolos especiais do SIDRA
 
-**Tratamento dos símbolos:** `-` e `0` viram zero observado; `..` e `...` viram vazio; `X` (sigilo) viraria vazio com a marca `valor_is_inibido`. A chave de integração é sempre o **código IBGE do município (7 dígitos)** — nunca o nome. O diagnóstico e as decisões estão em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md) e [`docs/relatorio_tratamento_dados.md`](docs/relatorio_tratamento_dados.md).
+| Símbolo | Interpretação | Tratamento documentado |
+| :---: | :--- | :--- |
+| `-` | Zero absoluto, conforme a documentação da variável | Convertido em zero observado quando aplicável. |
+| `0` | Zero numérico, sujeito à unidade e às notas da fonte | Mantido como zero numérico. |
+| `X` | Valor inibido para evitar identificação | Registrado como indisponível e sinalizado por `valor_is_inibido`. |
+| `..` | Não se aplica | Mantido como não disponível, sem substituição por zero. |
+| `...` | Dado não disponível | Mantido como ausente, sem substituição por zero. |
 
-### Regras de limpeza, agregação e integração
+No recorte analisado, a PAM apresentou 314.670 ocorrências do símbolo `-` e a base econômica apresentou 1.116 ocorrências de `...`, relacionadas à indisponibilidade do VAB em 2022 e 2023. A interpretação e o tratamento dos símbolos especiais consideram o significado de cada variável e as orientações da respectiva tabela do SIDRA.
 
-- **Limpeza:** remoção de duplicatas pelas chaves oficiais (mantendo o último registro); tratamento dos símbolos especiais (acima); padronização de nomes de colunas e categorias; códigos territoriais lidos como texto.
-- **Agregação:** as bases permanecem em formato longo (uma linha por território-ano-variável-produto/espécie). Quantidades de culturas com unidades diferentes e efetivos de espécies distintas **não são somados** como equivalentes; rendimentos médios também não são somados. Somas só ocorrem em unidades homogêneas (por exemplo, valor monetário entre as sete culturas).
-- **Integração (junção reproduzível):** as três bases são integradas pela chave `territorio_codigo` + `ano_nome`, com cardinalidade esperada **1:1** por município-ano (validada com `validate="one_to_one"`). Os 184 municípios aparecem nas três bases; o cruzamento completo alcança **2021** (limite do VAB) e o cruzamento com o PIB, **2023**. O código é `src/cruzamento_bases.py` e o resultado, a base `dados/analytical/cruzamento_pam_ppm_pib.csv`, usada nas análises e no dashboard.
-- **Sem API em tempo de execução:** o dashboard lê apenas arquivos estáticos versionados no repositório; não há chamadas ao SIDRA em tempo de execução.
+### Diagnóstico das bases
+
+| Base | Linhas no inventário | Colunas | Duplicatas reportadas | Ausências após o tratamento ou disponibilidade |
+| :--- | ---: | ---: | ---: | :--- |
+| PAM | 143.220 | 13 | 0 | 0 após o tratamento descrito |
+| PPM | 20.460 | 13 | 0 | 0 no recorte analisado |
+| PIB municipal | 15.624 | 11 | 0 | 1.116 valores indisponíveis do VAB em 2022 e 2023 |
+
+As duplicatas são verificadas segundo as chaves oficiais e não apenas pela repetição de valores. A padronização mantém o contexto territorial, o período, a variável e, quando aplicável, a cultura ou a espécie.
+
+### Agregação e integração
+
+As séries agrícolas preservam a distinção entre culturas e variáveis. Quantidades com unidades distintas, rendimentos médios e efetivos de espécies diferentes não são somados como se fossem medidas equivalentes. Quando uma análise exige o valor conjunto das sete culturas, os valores monetários são agregados em uma mesma unidade, com o recorte explicitado.
+
+A integração utiliza `territorio_codigo` e o ano, depois da agregação necessária para obter uma linha por município e ano em cada base. A cardinalidade esperada é de um para um, verificada no código com `validate="one_to_one"`. O pareamento não utiliza nomes de municípios.
+
+| Indicador de cobertura municipal e temporal | Resultado reportado |
+| :--- | ---: |
+| Municípios | 184 |
+| Anos de 2003 a 2024 | 22 |
+| Combinações possíveis de município e ano | 4.048 |
+| Combinações com PAM, PPM e PIB | 3.864 |
+| Correspondência entre as três bases | 95,5% |
+| Combinações sem PIB em 2024 | 184 (4,5%) |
+
+A ausência do PIB em 2024 explica as 184 combinações sem correspondência nesse ano. Isso não significa que todas as variáveis econômicas estejam disponíveis nas 3.864 linhas: os cruzamentos que utilizam o VAB devem limitar-se a 2021, enquanto aqueles que utilizam apenas o PIB podem chegar a 2023. 
+
+Os indicadores de cobertura apresentados nesta seção foram obtidos a partir do processo de integração implementado em [`src/cruzamento_bases.py`](src/cruzamento_bases.py). O arquivo resultante, [`dados/analytical/cruzamento_pam_ppm_pib.csv`](dados/analytical/cruzamento_pam_ppm_pib.csv), reúne os dados integrados utilizados nas análises e pode ser reproduzido a partir dos arquivos originais.
+
+## 5. Principais resultados da análise exploratória
+
+Os gráficos completos, as tabelas detalhadas e os mapas estão disponíveis nos materiais de [`docs/`](docs/) e no dashboard. A síntese a seguir registra os resultados necessários para compreender as conclusões do projeto.
+
+### Agricultura
+
+Em 2024, o milho ocupou a maior área plantada entre as sete culturas selecionadas, com 572.432 hectares. A mandioca apresentou o maior volume físico, com 817.857 toneladas, enquanto a cana-de-açúcar registrou o maior rendimento médio, com 62.998 kg/ha. A banana liderou o valor da produção, com aproximadamente R$ 905,3 milhões.
+
+A comparação entre milho e banana mostra por que área, volume produzido e valor bruto não devem ser tratados como indicadores equivalentes. A banana utilizou cerca de quinze vezes menos área plantada que o milho, produziu mais toneladas e apresentou quase o dobro do valor bruto em 2024. O melão, por sua vez, registrou cerca de R$ 44,1 mil por hectare colhido, o maior valor entre as culturas selecionadas. Esse indicador não representa lucro, pois não incorpora custos de produção.
+
+Outra dimensão relevante é a diferença entre área plantada e área colhida. No milho, 38.361 hectares plantados em 2012 não se converteram em área colhida, o equivalente a 7,16% da área plantada naquele ano. A base informa a diferença entre as áreas, mas não permite determinar, isoladamente, sua causa.
+
+![Valor da produção agrícola por cultura no Ceará](docs/imagens/pam_valor_producao.png)
+
+![Especialização agrícola municipal em 2024](docs/imagens/pam_mapa_cultura_dominante.png)
+
+### Pecuária
+
+Os galináceos apresentam o maior efetivo entre as espécies analisadas, com aproximadamente 38,52 milhões de cabeças em 2024. No período de 2003 a 2024, seu efetivo cresceu cerca de 1,78 vez, enquanto o dos ovinos cresceu aproximadamente 1,47 vez.
+
+A distribuição territorial também é heterogênea. Em 2024, Tauá apresentou os maiores efetivos municipais de caprinos e ovinos, Morada Nova liderou em bovinos, Viçosa do Ceará em suínos e Beberibe em galináceos. O número de cabeças, entretanto, não informa diretamente receita, produção de carne, leite, ovos ou lucro.
+
+![Evolução dos efetivos pecuários](docs/imagens/ppm_efetivo_evolucao.png)
+
+![Distribuição territorial dos rebanhos](docs/imagens/ppm_mapa_rebanho_dominante.png)
+
+### Economia municipal
+
+Entre 2003 e 2023, o PIB nominal do Ceará passou de aproximadamente R$ 32,7 bilhões para R$ 232,2 bilhões. A comparação indexada mostra um fator de crescimento de cerca de 7,1 para o Ceará e de 6,37 para o Brasil. Como os dados estão a preços correntes, essa comparação não representa crescimento real descontado da inflação.
+
+Fortaleza apresentou o maior PIB municipal em 2023, com aproximadamente R$ 86,94 bilhões. São Gonçalo do Amarante se destacou pelo crescimento proporcional do PIB no período, próximo de setenta vezes, acompanhado de aumento da participação industrial no VAB municipal. A associação desse padrão ao Complexo do Pecém é uma interpretação contextual, não uma causalidade demonstrada pelas tabelas utilizadas.
+
+Em 2021, a agropecuária correspondeu a 6,23% do VAB estadual, mas apresentou participação muito mais elevada em alguns municípios do interior, como São João do Jaguaribe, com 44,83%. Isso evidencia a diferença entre o tamanho absoluto da economia e o peso relativo da agropecuária em cada município.
+
+![Crescimento nominal indexado do PIB do Ceará e do Brasil](docs/imagens/pib_ceara_brasil_indexado.png)
+
+![Participação da agropecuária no VAB municipal](docs/imagens/municipios_participacao_agro.png)
+
+## 6. Resultados dos cruzamentos
+
+Os cruzamentos foram realizados apenas para períodos comparáveis. As correlações apresentadas utilizam principalmente o coeficiente de Spearman, que descreve associações monotônicas entre variáveis, mas não determina causalidade.
+
+| Cruzamento | Resultado principal |
+| :--- | :--- |
+| Valor das sete culturas da PAM e VAB agropecuário, 2021 | Correlação de Spearman de aproximadamente 0,75. |
+| Efetivo de galináceos e VAB agropecuário, 2021 | Correlação de aproximadamente 0,59. |
+| Área de milho e efetivo bovino, 2021 | Correlação de aproximadamente 0,61. |
+| Valor das sete culturas e participação da agropecuária no VAB, 2021 | Correlação de aproximadamente 0,33. |
+
+**Produção agrícola e riqueza agropecuária.** Os municípios com maior valor da produção das sete culturas tendem a apresentar maior VAB agropecuário. A associação de 0,75 foi a mais elevada entre os principais cruzamentos econômicos municipais apresentados. Valor da produção e VAB, porém, são medidas distintas.
+
+**Pecuária e riqueza agropecuária.** As associações com o VAB agropecuário variam entre as espécies. Os coeficientes reportados foram 0,59 para galináceos, 0,52 para bovinos, 0,48 para suínos, 0,33 para ovinos e 0,24 para caprinos.
+
+**Agricultura e pecuária.** Os resultados mostram associações entre a área plantada de milho ou feijão e alguns efetivos pecuários. Milho e bovinos apresentaram correlação de 0,61; milho e ovinos, 0,55; feijão e ovinos, 0,54; e feijão e caprinos, 0,53. O melão apresentou correlações próximas de zero com quase todos os rebanhos analisados.
+
+**Valor absoluto e participação econômica.** A correlação de aproximadamente 0,33 entre o valor das sete culturas e a participação agropecuária no VAB mostra que produzir mais não significa necessariamente depender proporcionalmente mais da agropecuária. São João do Jaguaribe apresentou participação de 44,83% e VAB agropecuário de R$ 46,7 milhões, enquanto Beberibe registrou participação de 36,49% e VAB agropecuário de R$ 370,2 milhões.
+
+![Relação entre valor agrícola e VAB agropecuário](docs/imagens/cruzamento_pam_vab_scatter.png)
+
+![Relações entre agricultura e rebanhos](docs/imagens/cruzamento_pam_ppm_heatmap.png)
+
+A conclusão geral é que agricultura, pecuária e estrutura econômica estão associadas, mas não de maneira uniforme. A dimensão econômica da produção, o tamanho dos rebanhos e a participação da agropecuária revelam aspectos diferentes dos municípios.
+
+## 7. Dashboard interativo
+
+O dashboard foi desenvolvido em Streamlit para transformar os resultados da análise exploratória em uma experiência de consulta. Os filtros permitem selecionar recortes territoriais, temporais e produtivos. A aplicação utiliza arquivos estáticos do repositório, sem consultas ao SIDRA ou a outras APIs durante a execução.
+
+| Tela | Conteúdo |
+| :--- | :--- |
+| Visão geral | Contexto, recorte do projeto, indicadores e orientações de navegação. |
+| Agricultura (PAM) | Séries por cultura, área, produção, valor por hectare e mapas agrícolas. |
+| Pecuária (PPM) | Séries independentes por espécie (índice e escala log) e crescimento dos rebanhos. |
+| Economia municipal | PIB, VAB, rankings, crescimento e participação da agropecuária. |
+| Território | Comparações municipais, mapas e distribuições territoriais. |
+| Cruzamentos | Gráficos de dispersão e correlações construídos a partir das bases integradas. |
+| Sínteses | Principais resultados, perguntas respondidas e indicadores calculados a partir dos dados. |
+| Fontes e metodologia | Origem das bases, cobertura, definições, tratamento e limitações. |
+
+As comparações territoriais consideram as unidades de medida, os períodos disponíveis e os filtros selecionados. Quando uma combinação de filtros não apresenta registros, o dashboard informa a indisponibilidade dos dados, distinguindo valores ausentes de valores iguais a zero.
+
+## 8. Como executar localmente
+
+É necessário ter Python e acesso aos arquivos estáticos do repositório. Os comandos abaixo devem ser executados na raiz do projeto.
 
 ```bash
-python src/pipeline.py
+git clone https://github.com/andradebyte/projeto-ciencia-de-dados-unifor.git
+cd projeto-ciencia-de-dados-unifor
+
+python -m venv .venv
 ```
 
-Os dados tratados são salvos em `dados/processed/` e a base cruzada em `dados/analytical/`.
-
----
-
-## 1. Análise exploratória — PAM (Agricultura)
-
-### Inventário
-
-| Característica | Resultado |
-|---|---|
-| Período | 2003–2024 (22 anos) |
-| Municípios do Ceará | 184 |
-| Produtos analisados | 7 |
-| Variáveis analisadas | 5 |
-| Linhas | 143.220 |
-| Colunas | 13 |
-| Duplicatas | 0 |
-| Valores ausentes após tratamento | 0 |
-
-Cada variável conta uma história diferente: **hectares** mostram uso da terra; **toneladas** mostram volume físico; **kg/ha** mostram produtividade; e o **valor da produção** mostra a dimensão econômica bruta.
-
-### Como estava a agricultura cearense em 2024?
-
-| Pergunta | Resultado em 2024 | Leitura |
-|---|---|---|
-| Qual cultura ocupou mais área? | Milho — 572.432 ha plantados | Maior ocupação de terra |
-| Qual produziu mais toneladas? | Mandioca — 817.857 t | Maior volume físico |
-| Qual teve maior rendimento médio? | Cana-de-açúcar — 62.998 kg/ha | Maior produção por hectare |
-| Qual gerou maior valor? | Banana — R$ 905,3 mi | Liderança econômica |
-| Qual usa pouca área e gera muito valor? | Melão — 2.487 ha colhidos e R$ 109,7 mi | Grande valor bruto por hectare |
-
-**Valor da produção em 2024 e participação no total das sete culturas:**
-
-| Produto | Valor da produção | Participação |
-|---|---|---|
-| Banana | R$ 905,3 mi | 29,8% |
-| Mandioca | R$ 524,0 mi | 17,3% |
-| Castanha de caju | R$ 472,0 mi | 15,6% |
-| Milho | R$ 457,2 mi | 15,1% |
-| Feijão | R$ 443,3 mi | 14,6% |
-| Cana-de-açúcar | R$ 123,0 mi | 4,1% |
-| Melão | R$ 109,7 mi | 3,6% |
-
-![Evolução do valor econômico da produção por cultura no Ceará, 2003–2024](docs/imagens/pam_valor_producao.png)
-
-### Mais terra significa mais valor?
-
-**Não.** Em 2024, o milho ocupou **572.432 ha** plantados, produziu **398.661 t** e gerou **R$ 457,2 mi**. A banana ocupou **37.612 ha**, produziu **481.841 t** e gerou **R$ 905,3 mi**. Ou seja, a banana usou cerca de **15 vezes menos área** que o milho, mas produziu mais toneladas e gerou quase o **dobro** do valor bruto.
-
-![Comparação entre milho e banana em 2024 — área, quantidade e valor (Milho = 100)](docs/imagens/pam_milho_banana.png)
-
-### Valor bruto da produção por hectare colhido
-
-Métrica derivada: **valor da produção ÷ área colhida**. Não representa lucro, pois a base não informa custos, e não é o mesmo que rendimento físico (kg/ha).
-
-| Cultura | Área colhida | Valor da produção | Valor bruto por ha |
-|---|---:|---:|---:|
-| Melão | 2.487 ha | R$ 109,7 mi | **R$ 44,1 mil/ha** |
-| Banana | 37.577 ha | R$ 905,3 mi | R$ 24,1 mil/ha |
-| Cana-de-açúcar | 8.828 ha | R$ 123,0 mi | R$ 13,9 mil/ha |
-| Mandioca | 74.423 ha | R$ 524,0 mi | R$ 7,0 mil/ha |
-| Castanha de caju | 282.602 ha | R$ 472,0 mi | R$ 1,67 mil/ha |
-| Feijão | 346.245 ha | R$ 443,3 mi | R$ 1,28 mil/ha |
-| Milho | 572.172 ha | R$ 457,2 mi | R$ 799/ha |
-
-![Evolução do valor bruto da produção por hectare colhido no Ceará](docs/imagens/pam_valor_hectare.png)
-
-![Comparação relativa do valor bruto por hectare (Milho = 100)](docs/imagens/pam_valor_hectare_comparacao.png)
-
-Ter mais hectares não significa gerar mais valor: em 2024 o **melão** teve o maior valor bruto por hectare colhido.
-
-### Área plantada × área efetivamente colhida (milho)
-
-![Área plantada por cultura no Ceará, 2003–2024](docs/imagens/pam_area_plantada.png)
-
-![Distribuição da área plantada das sete culturas em 2024](docs/imagens/pam_area_plantada_participacao.png)
-
-| Ano | Área plantada | Área colhida | Não convertida em colheita | Diferença relativa |
-|---|---:|---:|---:|---:|
-| 2008 | 694.054 ha | 675.480 ha | 18.574 ha | 2,68% |
-| 2009 | 714.034 ha | 691.632 ha | 22.402 ha | 3,14% |
-| 2012 | 535.959 ha | 497.598 ha | 38.361 ha | 7,16% |
-
-![Milho: área plantada versus área colhida no Ceará, 2003–2024](docs/imagens/pam_milho_area_plantada_colhida.png)
-
-**Cuidado:** a base mostra a diferença entre área plantada e colhida, mas **não informa a causa**. É mais correto falar em "área que não se converteu em colheita" do que assumir perda por um fator específico.
-
-### Especialização territorial
-
-Para cada município foi identificada a **cultura de maior valor da produção** entre as sete. Em 2024, os municípios líderes por cultura foram:
-
-![Cultura dominante em cada município do Ceará, 2024](docs/imagens/pam_mapa_cultura_dominante.png)
-
-![Municípios líderes em valor da produção por cultura, 2024](docs/imagens/pam_municipios_lideres.png)
-
-| Produto | Município líder | Valor da produção |
-|---|---|---:|
-| Banana | Limoeiro do Norte | R$ 165,1 mi |
-| Mandioca | Salitre | R$ 107,9 mi |
-| Castanha de caju | Beberibe | R$ 70,7 mi |
-| Melão | Aracati | R$ 52,2 mi |
-| Cana-de-açúcar | São Benedito | R$ 36,4 mi |
-| Feijão | Ocara | R$ 32,3 mi |
-| Milho | Crateús | R$ 24,4 mi |
-
-### Perguntas e insights da PAM
-
-- **Qual cultura ocupou mais área em 2024?** Milho, com 572.432 ha plantados.
-- **Qual teve maior rendimento médio?** Cana-de-açúcar, com 62.998 kg/ha.
-- **Qual gerou maior valor?** Banana, com R$ 905,3 milhões.
-- **Ter mais área significa gerar mais valor?** Não. O milho ocupa muito mais área, mas a banana gera quase o dobro do valor bruto.
-- **Qual cultura gera mais valor bruto por hectare colhido?** Melão, com cerca de R$ 44,1 mil/ha.
-- **Toda área plantada de milho chega à colheita?** Não. Em 2012 a diferença foi de 38.361 ha.
-
-**Insights:** a banana é a cultura de maior valor econômico; o milho usa mais terra mas não lidera em valor; o melão tem pouca área e o maior valor por hectare; área, quantidade, rendimento e valor contam histórias diferentes; e há forte **especialização territorial**.
-
----
-
-## 2. Análise exploratória — PPM (Pecuária)
-
-### Inventário
-
-| Característica | Resultado |
-|---|---|
-| Período | 2003–2024 (22 anos) |
-| Municípios do Ceará | 184 |
-| Espécies analisadas | 5 |
-| Linhas | 20.460 |
-| Colunas | 13 |
-| Valores ausentes | 0 |
-| Duplicatas | 0 |
-| Unidade | Cabeças |
-
-A variável principal é o **efetivo dos rebanhos** (número de cabeças). Ela **não mede** faturamento, produção de carne, leite, ovos ou lucro.
-
-### Como estava a pecuária cearense em 2024?
-
-| Rebanho | Efetivo em 2024 |
-|---|---:|
-| Galináceos | 38,52 milhões |
-| Bovinos | 2,86 milhões |
-| Ovinos | 2,62 milhões |
-| Suínos | 1,32 milhão |
-| Caprinos | 1,14 milhão |
-
-![Evolução do efetivo dos rebanhos no Ceará, 2003–2024](docs/imagens/ppm_efetivo_evolucao.png)
-
-![Participação de cada espécie no total de cabeças em 2024](docs/imagens/ppm_participacao_especies.png)
-
-Os **galináceos** dominam o efetivo analisado, com cerca de **83%** das cabeças em 2024. A diferença de escala é tão grande que as demais espécies ficam comprimidas em gráficos absolutos.
-
-### Distribuição territorial
-
-![Rebanho dominante em cada município do Ceará, 2024](docs/imagens/ppm_mapa_rebanho_dominante.png)
-
-| Espécie | 1º lugar | Cabeças | 2º lugar | Cabeças |
-|---|---|---:|---|---:|
-| Bovino | Morada Nova | 104.079 | Quixeramobim | 94.758 |
-| Caprino | Tauá | 90.651 | Independência | 58.182 |
-| Ovino | Tauá | 212.758 | Independência | 131.686 |
-| Suíno | Viçosa do Ceará | 51.000 | Granja | 49.465 |
-| Galináceos | Beberibe | 4.503.433 | Quixadá | 3.995.200 |
-
-![Municípios líderes por espécie em 2024](docs/imagens/ppm_municipios_lideres.png)
-
-### Perguntas e insights da PPM
-
-- **Qual é o rebanho mais numeroso?** Galináceos, com cerca de 38,5 milhões de cabeças em 2024.
-- **Qual espécie mais cresceu entre 2003 e 2024?** Galináceos, cerca de **1,78×**; ovinos em segundo, com cerca de **1,47×**.
-- **Quais municípios se destacam?** Tauá em caprinos e ovinos, Morada Nova em bovinos, Viçosa do Ceará em suínos e Beberibe em galináceos.
-
-**Insights:** galináceos dominam a escala absoluta; ovinos e galináceos aparecem como rebanhos dominantes no mapa de 2024; e **mais cabeças não significa necessariamente mais dinheiro**.
-
----
-
-## 3. Análise exploratória — Economia municipal (PIB/VAB)
-
-### Inventário
-
-| Característica | Resultado |
-|---|---|
-| Período do PIB | 2003–2023 |
-| Período do Valor Adicionado Bruto | 2003–2021 |
-| Municípios do Ceará | 184 |
-| Linhas | 15.624 |
-| Colunas | 11 |
-| Duplicatas | 0 |
-| Valores ausentes | 1.116 (VAB não disponível em 2022–2023) |
-
-| Variável | Unidade | O que mostra |
-|---|---|---|
-| PIB a preços correntes | Mil R$ | Valor total produzido pela economia |
-| VAB total | Mil R$ | Riqueza criada pelas atividades econômicas |
-| VAB da agropecuária | Mil R$ | Riqueza criada pela agropecuária |
-| Participação da agropecuária no VAB | % | Parcela da riqueza que veio da agropecuária |
-
-### Evolução do PIB do Ceará
-
-Entre 2003 e 2023, o PIB do Ceará passou de cerca de **R$ 32,7 bilhões** para **R$ 232,2 bilhões** — crescimento nominal de aproximadamente **7,1 vezes**. No mesmo período, o Brasil cresceu cerca de **6,37 vezes** (comparação indexada, 2003 = 100). Em valores absolutos, a linha do Ceará fica próxima da base, pois a economia brasileira é muito maior; por isso o gráfico indexado é o mais adequado para comparar ritmo.
-
-![Produto Interno Bruto do Ceará a preços correntes, 2003–2023](docs/imagens/pib_ceara.png)
-
-![Crescimento proporcional do PIB — Ceará × Brasil (base 2003 = 100)](docs/imagens/pib_ceara_brasil_indexado.png)
-
-![Valores nominais do PIB do Brasil e do Ceará, 2003–2023](docs/imagens/pib_brasil_ceara_absoluto.png)
-
-### Concentração e crescimento municipal
-
-- **Maior PIB municipal:** Fortaleza, com cerca de **R$ 86,94 bilhões** em 2023 — muito acima dos demais.
-- **Top 10 em crescimento proporcional (2003–2023):**
-
-![Dez municípios com maior PIB em 2023](docs/imagens/pib_top10.png)
-
-| # | Município | Fator | Crescimento |
-|---|---|---|---:|
-| 1 | São Gonçalo do Amarante | 70,0× | ≈ 6.897% |
-| 2 | Itaitinga | 38,4× | ≈ 3.741% |
-| 3 | Jijoca de Jericoacoara | 26,6× | ≈ 2.558% |
-| 4 | Pereiro | 21,8× | ≈ 2.078% |
-| 5 | Aquiraz | 17,8× | ≈ 1.678% |
-| 6 | Frecheirinha | 16,2× | ≈ 1.521% |
-| 7 | Uruoca | 14,0× | ≈ 1.304% |
-| 8 | Cruz | 13,9× | ≈ 1.292% |
-| 9 | Quixeré | 11,8× | ≈ 1.084% |
-| 10 | Beberibe | 11,5× | ≈ 1.054% |
-
-Fator = valor de 2023 ÷ valor de 2003; percentual = (fator − 1) × 100.
-
-![Top 10 municípios com maior crescimento proporcional do PIB, 2003–2023](docs/imagens/pib_top10_crescimento.png)
-
-### Valor Adicionado Bruto e peso da agropecuária
-
-![Valor Adicionado Bruto total do Ceará, 2003–2021](docs/imagens/vab_total.png)
-
-![Valor Adicionado Bruto da agropecuária do Ceará, 2003–2021](docs/imagens/vab_agropecuaria.png)
-
-- O **VAB total** do Ceará passou de cerca de **R$ 28,6 bilhões** (2003) para **R$ 167,1 bilhões** (2021) — cerca de **5,84×** nominal.
-- Em 2021, o **VAB da agropecuária** atingiu cerca de **R$ 10,41 bilhões**, com série mais oscilante que o total.
-- Composição em 2021: **agropecuária 6,23%** e **demais atividades 93,77%**.
-- **Municípios com maior participação agropecuária em 2021:** São João do Jaguaribe (44,83%), Milhã (42,88%), Varjota (42,83%), Missão Velha (40,04%), Guaraciaba do Norte (40,00%), Independência (38,51%), Beberibe (36,49%), Quixelô (35,67%), Aratuba (35,14%) e Croatá (34,69%).
-
-![Composição do Valor Adicionado Bruto total do Ceará em 2021](docs/imagens/vab_composicao.png)
-
-![Municípios com maior participação da agropecuária no VAB total em 2021](docs/imagens/municipios_participacao_agro.png)
-
-### São Gonçalo do Amarante
-
-É o maior destaque de crescimento proporcional do PIB. O padrão da base mostra que esse crescimento **não foi puxado pela agropecuária**: a participação da indústria no VAB aumentou fortemente, enquanto a participação agropecuária caiu para **0,7% em 2021**. Esse padrão é compatível com a transformação industrial associada ao Complexo do Pecém (contexto externo; as bases não demonstram causalidade).
-
-### Perguntas e insights da economia
-
-- **Como o PIB do Ceará evoluiu?** De R$ 32,7 bi para R$ 232,2 bi, cerca de 7,1× nominal.
-- **O Ceará cresceu mais que o Brasil?** Sim, na comparação nominal indexada: ~7,1× contra ~6,37×.
-- **Qual município concentra mais atividade?** Fortaleza, ~R$ 86,94 bi em 2023.
-- **Qual mais cresceu?** São Gonçalo do Amarante, ~70× entre 2003 e 2023.
-- **Quanto da riqueza veio da agropecuária em 2021?** Cerca de 6,23% do VAB total.
-- **Quais municípios têm maior peso agropecuário?** São João do Jaguaribe, Milhã, Varjota, Missão Velha e Guaraciaba do Norte.
-
-**Insights:** forte crescimento nominal (não corrigido pela inflação); Fortaleza concentra a atividade estadual; o crescimento é desigual; a agropecuária é pequena no total estadual, mas pesa muito em alguns municípios do interior; e **PIB alto não significa economia agropecuária forte**.
-
----
-
-## 4. Cruzamento das bases — PAM × PPM × economia
-
-O cruzamento observa se os municípios que se destacam em uma dimensão também se destacam em outra. Como o Valor Adicionado Bruto termina em **2021**, esse é o principal ano de referência. As bases são integradas pela chave **`territorio_codigo` + `ano`**.
-
-### Como ler as correlações (Spearman)
-
-| Valor aproximado | Leitura |
-|---|---|
-| Próximo de 0 | Praticamente sem relação monotônica |
-| 0,2 a 0,4 | Relação fraca |
-| 0,4 a 0,6 | Relação moderada |
-| 0,6 a 0,8 | Relação forte |
-| Próximo de 1 | Relação muito forte |
-
-Correlação mostra **associação**, não prova que uma variável causa a outra.
-
-### 4.1 PAM × VAB da agropecuária
-
-Somando o valor das sete culturas por município, a correlação de Spearman com o VAB da agropecuária em 2021 foi de **≈ 0,75** — associação positiva forte. O padrão **não aparece só em 2021**: ao longo de 2003–2021 a relação permaneceu forte e, na soma estadual, as **variações anuais** das duas séries tiveram correlação de **≈ 0,97**.
-
-![Valor das sete culturas da PAM × VAB da agropecuária nos municípios, 2021](docs/imagens/cruzamento_pam_vab_scatter.png)
-
-![Evolução indexada do valor das culturas da PAM e do VAB da agropecuária, Ceará, 2003–2021](docs/imagens/cruzamento_pam_vab_evolucao.png)
-
-*Cuidado:* valor da produção da PAM e VAB são conceitos diferentes, e a PAM do projeto contém apenas sete culturas.
-
-### 4.2 PPM × VAB da agropecuária (2021)
-
-![Correlação entre efetivos pecuários e VAB da agropecuária em 2021](docs/imagens/cruzamento_ppm_vab.png)
-
-| Rebanho | Spearman |
-|---|---:|
-| Galináceos | 0,59 |
-| Bovinos | 0,52 |
-| Suínos | 0,48 |
-| Ovinos | 0,33 |
-| Caprinos | 0,24 |
-
-Há relação positiva, principalmente para galináceos, bovinos e suínos, mas **menor** que a observada entre o valor da produção agrícola e o VAB agropecuário. Ter mais animais tende a acompanhar uma economia agropecuária maior, mas o número de cabeças sozinho não explica o tamanho econômico.
-
-### 4.3 PAM × PPM (2021) — área plantada × efetivo
-
-| Cultura × rebanho | Spearman |
-|---|---:|
-| Milho × Bovinos | 0,61 |
-| Milho × Ovinos | 0,55 |
-| Feijão × Ovinos | 0,54 |
-| Feijão × Caprinos | 0,53 |
-| Feijão × Bovinos | 0,49 |
-| Feijão × Suínos | 0,49 |
-
-![Relação entre área plantada (PAM) e rebanhos (PPM), 2021](docs/imagens/cruzamento_pam_ppm_heatmap.png)
-
-Milho e feijão aparecem com frequência nos mesmos municípios em que os rebanhos de bovinos, ovinos e caprinos são maiores — perfis territoriais semelhantes, **não causalidade**.
-
-### 4.4 Relações que praticamente não apareceram
-
-O **melão** apresentou correlações próximas de **zero** com quase todos os rebanhos. Nem todas as atividades agrícolas compartilham o mesmo padrão territorial da pecuária — e **encontrar ausência de relação também é um resultado relevante**.
-
-### 4.5 Produção × participação da agropecuária
-
-Em 2021, a correlação entre o valor das sete culturas e a **participação da agropecuária** no VAB total foi de **≈ 0,33** — associação fraca. Produzir muito não significa que a agropecuária tenha grande peso na economia municipal.
-
-| Município | Participação agropecuária | VAB agropecuário |
-|---|---:|---:|
-| São João do Jaguaribe | 44,83% | R$ 46,7 mi |
-| Beberibe | 36,49% | R$ 370,2 mi |
-| Fortaleza | 0,18% | R$ 107,1 mi |
-
-![Peso relativo × tamanho absoluto da agropecuária nos municípios, 2021](docs/imagens/cruzamento_absoluto_participacao.png)
-
-São João do Jaguaribe é proporcionalmente mais ligado à agropecuária; Beberibe, porém, gera muito mais riqueza agropecuária em valor absoluto. **Participação percentual e tamanho absoluto são dimensões diferentes.**
-
-### 4.6 PIB total × agropecuária
-
-Municípios com PIB alto não são necessariamente grandes economias agropecuárias:
-
-| Caso | Leitura |
-|---|---|
-| Fortaleza | Em 2021, PIB de ~R$ 73,4 bi e participação agropecuária de apenas 0,18%. |
-| São Gonçalo do Amarante | Em 2021, participação agropecuária de ~0,67%; o forte crescimento não acompanha aumento do peso agropecuário. |
-
-Para estudar a força econômica da agropecuária, o **VAB agropecuário e sua participação** são mais informativos que o PIB isoladamente.
-
-### Perguntas e insights dos cruzamentos
-
-- **Maior valor de produção agrícola está relacionado a maior riqueza agropecuária?** Sim, forte (~0,75 em 2021).
-- **Rebanhos maiores estão relacionados a maior riqueza agropecuária?** Em parte; mais claro para galináceos, bovinos e suínos.
-- **Agricultura e pecuária aparecem juntas?** Em alguns casos; milho e feijão têm as associações mais claras com rebanhos.
-- **Toda cultura está relacionada à pecuária?** Não; o melão praticamente não tem relação com os rebanhos.
-- **Produzir muito significa grande participação na economia?** Não; valor absoluto e participação percentual são medidas diferentes.
-- **PIB alto significa município agropecuário?** Não; Fortaleza e São Gonçalo do Amarante são exemplos.
-
-**Insight geral:** agricultura, pecuária e estrutura econômica se relacionam, mas **não de forma uniforme**. O valor da produção agrícola tem associação forte com a riqueza criada pela agropecuária, enquanto os rebanhos mostram relações mais moderadas. Além disso, **produzir muito não significa que a agropecuária represente grande parte da economia municipal**.
-
----
-
-## Cuidados e limitações
-
-- **Correlação não significa causalidade.**
-- Valores monetários estão em **preços correntes** e não foram corrigidos pela inflação.
-- O valor da produção da PAM é **valor bruto** — não é lucro e não é igual ao VAB.
-- A PPM informa **número de cabeças**, não receita, carne, leite, ovos ou lucro.
-- A PAM do projeto contém **apenas sete culturas**, portanto não representa toda a produção agrícola municipal.
-- A diferença entre área plantada e colhida **não permite identificar, sozinha, a causa** da não conversão em colheita.
-- As métricas de VAB vão **até 2021**, por isso 2021 é o principal ano de cruzamento completo.
-
-### Resumo final
-
-| Dimensão | Principal conclusão |
-|---|---|
-| Agricultura (PAM) | Área, quantidade, produtividade e valor econômico não caminham necessariamente juntos. |
-| Pecuária (PPM) | Galináceos dominam em escala absoluta; diferentes regiões têm especializações pecuárias. |
-| Economia municipal | PIB alto não significa peso agropecuário alto. |
-| PAM × economia | Valor da produção agrícola tem associação forte com o VAB da agropecuária. |
-| PPM × economia | Efetivos pecuários têm associação positiva, mas mais moderada, com a riqueza agropecuária. |
-| PAM × PPM | Milho e feijão aparecem associados a diferentes rebanhos; o melão praticamente não mostra o mesmo padrão. |
-
----
-
-## Dashboard
-
-O dashboard interativo é um app **Streamlit** em `app/`, com oito telas:
-
-1. **Visão geral** — contexto, indicadores e atalhos.
-2. **Agricultura (PAM)** — evolução por cultura, área absoluta/percentual, valor bruto por hectare, área plantada × colhida e mapa de cultura dominante.
-3. **Pecuária (PPM)** — efetivos por espécie, composição e mapa de rebanho dominante.
-4. **Economia municipal (PIB)** — PIB, Ceará × Brasil, rankings, crescimento, VAB e caso São Gonçalo do Amarante.
-5. **Território** — mapa, ranking e distribuição por espécie.
-6. **Cruzamentos** — dispersões e correlações entre as bases.
-7. **Sínteses** — destaques, perguntas e respostas e insights, com os valores **recalculados a partir dos dados**.
-8. **Fontes e metodologia** — tabelas, cobertura temporal e limitações.
-
-Os achados exibidos são calculados em tempo de execução (`app/insights.py`), sem números fixos no código. Todos os gráficos informam a fonte e separam associação de causalidade.
+Ative o ambiente virtual no sistema utilizado:
 
 ```bash
-streamlit run app/app.py
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+
+# Linux ou macOS
+source .venv/bin/activate
 ```
 
----
-
-## Como executar
+Instale as dependências, prepare os dados e inicie o dashboard:
 
 ```bash
-# 1. (opcional) ambiente virtual
-python -m venv .venv && source .venv/bin/activate
-
-# 2. dependências
 pip install -r requirements.txt
-
-# 3. pipeline de preparação (raw -> processed) e cruzamento
 python src/pipeline.py
-
-# 4. dashboard
 streamlit run app/app.py
 ```
 
-## Requisitos
+O pipeline gera os dados tratados em `dados/processed/` e a base integrada em `dados/analytical/`, conforme a organização do projeto. Os módulos de preparação estão em `src/`, e a aplicação Streamlit está em `app/`. Para verificar os testes disponíveis para o indicador de valor por hectare, consulte `app/test_data.py`.
 
-Principais dependências: `pandas`, `numpy` e `streamlit`.
 
----
+## 9. Limitações e cuidados metodológicos
 
-## Entregáveis do Projeto 1
+Os resultados devem ser interpretados dentro dos recortes e das características das fontes utilizadas. Todos os valores monetários apresentados estão a preços correntes, sem deflação. Portanto, as séries históricas monetárias descrevem evolução nominal, não crescimento real.
 
-Conferência com o documento de requisitos (Unidade I):
+O valor bruto da produção agrícola não representa lucro nem equivale ao VAB agropecuário. A PPM informa o efetivo dos animais, não a receita da atividade pecuária. A PAM contém apenas sete culturas selecionadas e, por isso, não representa toda a produção agrícola cearense.
 
-| Entregável exigido | Onde está | Situação |
-|---|---|---|
-| Repositório GitHub público | `github.com/andradebyte/projeto-ciencia-de-dados-unifor` | pronto |
-| Dashboard publicado, sem autenticação | link em "Links Rápidos" | pronto |
-| Código executável do início ao fim (raw → processed → analytical) | `src/pipeline.py` e `src/cruzamento_bases.py` | pronto |
-| `requirements.txt` | raiz do repositório | pronto |
-| Inventário/dicionário de dados | seção "Dicionário de dados" deste README | pronto |
-| Registro de limpeza, agregação e integração | seção "Pipeline de preparação de dados" | pronto |
-| ≥ 4 insights (≥ 2 de cruzamento) | seções de análise e "Sínteses" do dashboard | pronto |
-| Slides do pitch (PDF) | `docs/slides.pdf` | pendente |
-| Acompanhamento | `docs/acompanhamento.pdf` | pronto |
-| Vídeo extensionista (YouTube) | "Links Rápidos" | pendente |
-| DreamShaper (100%) e submissão no AVA (`Projeto1_Equipe_<LETRA>.pdf`) | — | pendente |
+As bases também possuem limites temporais diferentes. As séries físicas podem chegar a 2024, os cruzamentos com PIB a 2023 e aqueles que dependem do VAB a 2021. A diferença entre área plantada e área colhida não permite concluir, por si só, que houve perda causada por seca ou outro fator específico. Por fim, as correlações observadas descrevem associações exploratórias, sem demonstrar relações causais.
 
-O dashboard lê arquivos estáticos versionados no repositório, é publicado sem autenticação e apresenta mensagens claras quando um filtro não retorna dados.
+## 10. Possíveis desdobramentos
 
----
+Os resultados deste projeto abrem possibilidades para aprofundar a compreensão das transformações agropecuárias e econômicas dos municípios cearenses. Como continuidade, propõem-se as seguintes investigações:
 
-## Autoria
+### 10.1. Emprego e transformação econômica
 
-Equipe 02 — Tema 2, Agropecuária e transformação econômica · disciplina de Ciência de Dados, Unifor. Fontes: IBGE/SIDRA (tabelas 5457, 3939 e 5938) e API de Malhas do IBGE.
+Integrar dados da RAIS e do CAGED para investigar se o crescimento do PIB em municípios como São Gonçalo do Amarante foi acompanhado pela expansão do emprego formal. Essa análise permitiria compreender melhor as relações entre as transformações econômicas e o mercado de trabalho local.
+
+### 10.2. Clima e produção agrícola
+
+Incorporar dados pluviométricos da FUNCEME para investigar a relação entre a precipitação e a área plantada não convertida em colheita. A integração dessas informações permitiria avaliar possíveis associações entre a variabilidade climática e o desempenho agrícola, considerando outros fatores que também podem influenciar os resultados.
+
+### 10.3. Disponibilidade de terras e produção agrícola
+
+Investigar a relação entre a disponibilidade de terras agrícolas e a área destinada ao cultivo de diferentes culturas, especialmente o milho. A incorporação de dados sobre área territorial, uso do solo e disponibilidade de terras para atividades agrícolas permitiria avaliar se os municípios com maior disponibilidade de espaço tendem a destinar áreas maiores ao cultivo de milho ou se essa distribuição está associada a outros fatores produtivos e econômicos.
+
+### 10.4. Valor econômico dos rebanhos
+
+Ampliar a análise da PPM por meio da incorporação de indicadores econômicos da atividade pecuária, como preços por espécie, valor da produção e dados sobre carne, leite e ovos.
+
+Essa ampliação permitiria investigar a relação entre o tamanho dos rebanhos e sua contribuição econômica, uma vez que o número de cabeças, isoladamente, não representa o valor gerado pela atividade. Também possibilitaria aprofundar os cruzamentos com o VAB agropecuário e identificar diferenças entre municípios com grandes efetivos pecuários e aqueles com maior produção econômica.
+
+### 10.5. Aplicação dos resultados ao planejamento regional
+
+Aprofundar a utilização conjunta de indicadores absolutos e relativos para caracterizar a importância da agropecuária nos municípios cearenses. Essa abordagem permitiria distinguir municípios com grande volume de produção daqueles em que a atividade agropecuária possui maior participação na economia local.
+
+Os resultados poderão subsidiar estudos sobre especialização territorial, desenvolvimento econômico e planejamento regional, contribuindo para a formulação de políticas públicas mais adequadas às características de cada município.
+
+## 11. Autoria e referências
+
+**Grupo C, Tema 2, Ciência de Dados, Universidade de Fortaleza (Unifor).**
+
+João Igor Vidal de Andrade, Raquel Albuquerque Quirino, Amanda Lira Andrade Botelho e Sofya Emily Oliveira.
+
+**Fontes dos dados:** Instituto Brasileiro de Geografia e Estatística (IBGE), tabelas SIDRA 5457 (PAM), 3939 (PPM) e 5938 (PIB dos Municípios), além da malha municipal do Ceará de 2022. Os detalhes dos arquivos utilizados estão em [`dados/fontes.csv`](dados/fontes.csv).
+
+**Referências metodológicas internas:** [`dados/README_DADOS.md`](dados/README_DADOS.md) e [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md).

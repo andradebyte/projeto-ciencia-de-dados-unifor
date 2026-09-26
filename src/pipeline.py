@@ -11,8 +11,8 @@ def run_pipeline():
     
     # Paths base
     base_dir = Path(__file__).resolve().parent.parent
-    raw_dir = base_dir / "data" / "raw"
-    processed_dir = base_dir / "data" / "processed"
+    raw_dir = base_dir / "dados" / "raw"
+    processed_dir = base_dir / "dados" / "processed"
     
     # Criar pasta de dados tratados se não existir
     os.makedirs(processed_dir, exist_ok=True)
