@@ -97,7 +97,7 @@ Os códigos territoriais são tratados como texto para preservar a identificaç�
 └── README.md
 ```
 
-A organização separa os dados originais dos dados tratados e das tabelas analíticas. Os relatórios de preparação e tratamento detalham as decisões metodológicas em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md) e [`docs/relatorio_tratamento_dados.md`](docs/relatorio_tratamento_dados.md).
+A organização separa os dados originais dos dados tratados e das tabelas analíticas. O relatório de preparação detalha as decisões metodológicas em [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md).
 
 ## 4. Preparação e qualidade dos dados
 
@@ -300,4 +300,4 @@ João Igor Vidal de Andrade, Raquel Albuquerque Quirino, Amanda Lira Andrade Bot
 
 **Fontes dos dados:** Instituto Brasileiro de Geografia e Estatística (IBGE), tabelas SIDRA 5457 (PAM), 3939 (PPM) e 5938 (PIB dos Municípios), além da malha municipal do Ceará de 2022. Os detalhes dos arquivos utilizados estão em [`dados/fontes.csv`](dados/fontes.csv).
 
-**Referências metodológicas internas:** [`dados/README_DADOS.md`](dados/README_DADOS.md), [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md) e [`docs/relatorio_tratamento_dados.md`](docs/relatorio_tratamento_dados.md).
+**Referências metodológicas internas:** [`dados/README_DADOS.md`](dados/README_DADOS.md) e [`docs/relatorio_preparacao_dados.md`](docs/relatorio_preparacao_dados.md).
