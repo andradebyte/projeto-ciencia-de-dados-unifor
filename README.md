@@ -88,11 +88,17 @@ Os códigos territoriais são tratados como texto para preservar a identificaç�
 ├── docs/                      # Relatórios, apresentação e imagens
 ├── notebooks/                 # Exploração e análises geoespaciais
 ├── src/
-│   ├── data_loader.py         # Leitura dos arquivos originais
-│   ├── data_cleaner.py        # Verificação de duplicatas
-│   ├── data_standardizer.py   # Tipagem e tratamento dos símbolos
-│   ├── pipeline.py            # Orquestração da preparação
-│   └── cruzamento_bases.py    # Integração das bases
+│   ├── data_loader.py                        # Leitura dos arquivos originais
+│   ├── data_cleaner.py                       # Verificação de duplicatas
+│   ├── data_standardizer.py                  # Tipagem e tratamento dos símbolos
+│   ├── pipeline.py                           # Orquestração da preparação
+│   ├── cruzamento_bases.py                   # Integração das bases
+│   ├── analise_exploratoria_pam.py           # Análise exploratória da PAM (seção 5)
+│   ├── analise_exploratoria_pam_geoespacial.py  # Mapas da PAM (cultura dominante)
+│   ├── analise_exploratoria_ppm.py           # Análise exploratória da PPM (seção 5)
+│   ├── analise_exploratoria_ppm_geoespacial.py  # Mapas da PPM (rebanho dominante)
+│   ├── analise_exploratoria_pib.py           # Análise exploratória do PIB e VAB (seção 5)
+│   └── analise_exploratoria_pib_geoespacial.py  # Mapas do PIB e da participação agropecuária
 ├── requirements.txt
 └── README.md
 ```
